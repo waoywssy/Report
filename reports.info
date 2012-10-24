@@ -1,0 +1,13 @@
+; $Id: reports.info,v 1.0 2010/09/04 05:50:55 dries Exp $
+name = Majestic Reports
+description = Allows your site to capture votes on different topics in the form of multiple choice questions.
+package = Majestic
+version = VERSION
+core = 6.x
+dependencies[] = jquery_ui
+
+; Information added by drupal.org packaging script on 2010-08-11
+version = "6.19"
+project = "Majestic"
+datestamp = "1281559292"
+

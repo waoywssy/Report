@@ -1,0 +1,47 @@
+ul#treeDemo li{
+    background:none;
+}
+/*----------------------------------------------*/
+/*the following styles are for the pop-up bot adding feature*/
+.ui-widget-content .CaptionTD{
+	vertical-align:bottom;
+}
+.ui-widget-content .FormElement {
+	width:85%;
+}
+/*----------------------------------------------*/
+.ignored{
+	background-color:#AAD4FF;
+}
+.firstfound{
+	background-color:#FBEC88;
+}
+/*Notice: this one can't be put ahead of the above two styles*/
+.grid-hover{
+	background-color:#A5D9D9;
+}
+#files li{
+	margin-left:-30px;
+}
+.checkall{
+	margin-left:-10px;
+	margin-right:20px;
+}
+#confirm_msg{
+	color:#FF5500;
+}
+/*----------------------------------------------*/
+#path li{
+	list-style:none;
+	clear:both;
+}
+.hidden{
+	display:none;
+}
+.del{
+	margin-right:10px;
+	line-height:1.2em;
+}
+button{
+	margin-right:10px;
+}

@@ -1,0 +1,525 @@
+<?php
+function reports_menu() {
+    $items['show'] = array(
+        'page callback' => 'showTodayReports',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
+    $items['report'] = array(
+        'page callback' => 'menufun_add_report',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
+    $items['view'] = array(
+        'page callback' => 'menufun_view_report',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
+	$items['viewbots'] = array(
+        'page callback' => 'menufun_view_bots',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
+	$items['setpath'] = array(
+        'page callback' => 'menufun_set_path',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
+    $items['add'] = array(
+        'page callback' => 'menufun_add',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
+    $items['remove'] = array(
+        'page callback' => 'menufun_remove',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
+    $items['generate'] = array(
+        'page callback' => 'menufun_generate',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );   
+	$items['bots'] = array(
+        'page callback' => 'menufun_handler',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    ); 
+	$items['managebots'] = array(
+        'page callback' => 'menufun_managebots',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    ); 
+	$items['displayfiles'] = array(
+        'page callback' => 'displayfiles',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    ); 
+	$items['scan'] = array(
+        'page callback' => 'menufun_scan',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );	
+	$items['path'] = array(
+        'page callback' => 'menufun_path_js',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
+	$items['sectors'] = array(
+        'page callback' => 'menufun_load_sectors',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
+	
+	/*
+	$items['admin/settings/report'] = array(
+		'title' => 'ITG Report Settings',
+		'description' => 'Change how ITG Bots behave.',
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('reports_admin_settings'),
+		'access arguments' => array('administer site configuration'),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'reports.admin.inc',
+	);
+	*/
+
+    return $items;
+}
+function menufun_load_sectors(){
+	//$sectors = array();
+	$sql = "select sct_id as id, sector from mj_sectors";
+	$data = db_query($sql);
+	$i = 0;
+	while ($rec = db_fetch_object($data)){
+		$sectors->f[$i]['id']=$rec->id;
+		$sectors->f[$i]['sector']=$rec->sector;
+		$i++;
+	}
+	echo str_replace(
+			array('<', '>', '&'), 
+			array('\\u003c', '\\u003e', '\\u0026'), 
+			json_encode($sectors));
+}
+
+function menufun_path_js(){
+	$sector_id = $_REQUEST['sid'];
+	$sql = "SELECT * FROM mj_sectors_paths WHERE sps_sct_id = $sector_id";
+	$data = db_query($sql);
+	$output = array();
+	while ($row = db_fetch_object($data)){
+		$val = $row->sps_path . ';';
+		//$val = str_replace("\\\\", "\\", $val);
+		$output[] = $val;
+	}
+	drupal_json($output);
+}
+
+function menufun_set_path(){
+	$sid = $_REQUEST['sid'];
+	$path = $_REQUEST['p'];
+	$op = $_REQUEST['op'];
+	if (!empty($op)&&!empty($sid)&& !empty($path)){
+		// handling ajax requests
+		$path = str_replace("\\", "\\\\", $path);
+		if ($op=='add'){
+			$sql = "INSERT IGNORE INTO mj_sectors_paths VALUES($sid, '$path')";
+		} else if ($op=='del'){
+			$sql = "DELETE FROM mj_sectors_paths WHERE sps_sct_id = $sid AND sps_path = '$path'";
+			//var_dump($sql);
+		}
+		db_query($sql);
+		exit(0);
+	}
+	
+	/// displaying page content
+    drupal_add_css(drupal_get_path('module', 'reports') .'/css/tree.css');
+    drupal_add_js(drupal_get_path('module', 'reports') .'/js/setpath.js');
+	return '<div><select id="sectors"></select></div><div id="paths"></div><div><button id="add" type="button">Add</button><input id="newpath" value="" size="60"/>';
+}
+
+function displayfiles()
+{
+    $p_id = $_POST['id'];
+	
+	if (empty($p_id)){
+		$p_id = '0';
+	}
+	
+	$sql = "SELECT `id`, `isparent`, `fullname` FROM `mj_files` WHERE pid = '$p_id'";
+    $records = db_query($sql);
+	$output = '';
+	$output .= '[';
+    while ($data = db_fetch_object($records)) {
+		$output .= '{';
+		$output .= 'id:\'' . $data->id . '\',';
+		$output .= 'name:\'' . $data->fullname . '\',';
+		$output .= 'isParent:' . ($data->isparent == 0 ? 'false' : 'true');
+		$output .= '},';
+	}
+	if (strlen($output) > 1){
+		$output = substr($output, 0, strlen($output) - 1);
+	}
+	$output .= ']';
+	echo $output;
+}
+
+
+function showTodayReports()
+{
+    $date = $_POST['date'];
+    if (isset($date) && !empty($date) && strlen($date) > 0)
+    {
+    $sql = "select rpt_id, issue, rdate, delivery, rpt_bts_id, botname, sector, type, time, employee from mj_reports ";
+    $sql .= "LEFT OUTER JOIN mj_bots ON bts_id = rpt_bts_id LEFT OUTER JOIN mj_sectors ON sct_id = bts_sct_id ";
+    $sql .= " where rdate = '$date' order by employee desc, type";
+    
+    $result = ''; 
+    $records = db_query($sql);
+    echo '<table>';
+    //$space = str_repeat("&nbsp;", 4);
+    $space = '</td><td>';
+    $totaltime = 0;
+    while ($data = db_fetch_object($records)) {
+        echo '<tr><td>' . substr($data->rpt_bts_id, 0, 3) . $space . $data->botname . $space . $date .$space . $data->issue . $space . '<img src="' . drupal_get_path('module', 'reports') . '/image/drop-' . ($data->delivery == 1 ? 'yes' : 'no') .'.gif" />';
+        echo $space . $data->sector . $space . $data->type . $space . $data->time . $space . $data->employee. $space;
+        echo '<img class="close-img" alt="' . $data->rpt_id . '" src="' . drupal_get_path('module', 'reports') . '/image/close.gif" /></td></tr>';
+        $totaltime += $data->time;
+    }
+    echo '</table><br /> ';
+    
+    if($totaltime > 0){echo 'Total time: ' . $totaltime;}
+    }
+}
+
+function menufun_remove()
+{
+	module_load_include('inc', 'reports', 'inc/reports.del_report');
+}
+
+function menufun_add()
+{
+	module_load_include('inc', 'reports', 'inc/reports.add');
+}
+
+function menufun_add_report()
+{
+	drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/redmond/jquery.ui.all.css');
+    drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/default/ui.datepicker.css');
+    drupal_add_css(drupal_get_path('module', 'reports') .'/css/reports.css');
+    
+    jquery_ui_add(array('ui.datepicker', 'ui.widget', 'ui.button', 'ui.mouse', 'ui.slider'));
+    jquery_ui_add('ui.datepicker');  // For a single file
+    drupal_add_js(drupal_get_path('module', 'reports') .'/js/date.js');
+	
+	module_load_include('inc', 'reports', 'inc/reports.add_report');
+	
+	return add_report();
+}
+
+
+function menufun_view_report()
+{
+    drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/redmond/jquery.ui.all.css');
+    drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/default/ui.datepicker.css');
+	drupal_add_js(drupal_get_path('module', 'reports') .'/js/jquery.validate.js');
+    drupal_add_css(drupal_get_path('module', 'reports') .'/css/reports.css');
+    
+    jquery_ui_add(array('ui.datepicker', 'ui.widget', 'ui.button','ui.mouse', 'ui.slider'));
+    jquery_ui_add('ui.datepicker');  // For a single file
+    drupal_add_js(drupal_get_path('module', 'reports') .'/js/date.js');
+    
+    $date = $_POST['date'];
+    if (isset($date) && !empty($date) && strlen($date) > 0){
+        showTodayReports($date);
+        return;
+    }
+    
+    $result = '';
+    $result .= t('Report Date: <input id="datepicker" type="text" />');
+    $result .= t('&nbsp;&nbsp;<button id="view">View</button>&nbsp;&nbsp;<br /><br />');
+    $result .= t('</p>');
+    $result .= t('<p><div id="reports-grid"></div></p>');
+    return $result;
+}
+
+
+function menufun_view_bots()
+{
+	drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/redmond/jquery.ui.all.css');
+	drupal_add_js(drupal_get_path('module', 'reports') .'/js/stripe.js');
+    drupal_add_css(drupal_get_path('module', 'reports') .'/css/reports.css');
+		
+	module_load_include('inc', 'reports', 'inc/reports.view');
+	return view_report();
+}
+
+
+function menufun_generate()
+{
+	drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/redmond/jquery.ui.all.css');
+    drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/default/ui.datepicker.css');
+    drupal_add_css(drupal_get_path('module', 'reports') .'/css/reports.css');
+    
+    jquery_ui_add(array('ui.datepicker', 'ui.widget', 'ui.button'));
+    jquery_ui_add('ui.datepicker');  // For a single file
+    drupal_add_js(drupal_get_path('module', 'reports') .'/js/jquery.validate.js');
+    drupal_add_js(drupal_get_path('module', 'reports') .'/js/generate.js');
+        
+    $date1 = $_POST['fromdate'];
+    $date2 = $_POST['todate'];
+
+    if ((isset($date1) && !empty($date1) && strlen($date1) > 0)
+		&& isset($date2) && !empty($date2) && strlen($date2) > 0)
+    {
+		module_load_include('inc', 'reports', 'inc/reports.generate');
+	    require_once 'files/Classes/PHPExcel.php';
+        return  save_excel($date1, $date2);
+    }
+    
+    $result = '';
+    $result .= t('<form id="datesform" name="datesform" action="#" method="post" />');
+    $result .= t('From Date: <input id="fromdate" name="fromdate" type="text" />');
+    $result .= t('To Date: <input id="todate" name="todate" type="text" />');
+    $result .= t('&nbsp;&nbsp;<button id="generate" type="submit">Generate</button>&nbsp;&nbsp;<br /><br />');
+    $result .= t('</form>');
+    return $result;
+}
+
+function menufun_handler()
+{
+	module_load_include('inc', 'reports', 'inc/reports.view');
+	echo get_data();
+	exit();
+}
+
+function menufun_scan()
+{
+	$op = $_REQUEST['op'];
+	$bid = $_REQUEST['bid'];
+	// validation here
+	
+	if ($op == 'scan')
+	{
+		scan_files($bid);
+	}
+	else if ($op == 'upload')
+	{
+		// get the upload package
+		// unzip
+		// overwrite
+	}
+	else if ($op == 'download')
+	{
+		$checked = split(';', $_REQUEST['checked']);
+		
+		zip_files($bid, $checked);
+	}
+	else if ($op == 'confirm')
+	{
+		$checked = $_REQUEST['checked'];
+		$unchecked = $_REQUEST['unchecked'];
+		
+		$checked = split(';', $checked);
+		$unchecked = split(';', $unchecked);
+		
+		check_files($bid, $checked, 1);
+		check_files($bid, $unchecked, 0);
+		
+		// get script list
+		// update to database
+		//list_bot_related_files($bid);
+		echo 'true';
+	}
+}
+
+function scan_files($bid){
+	
+	$sql = "SELECT version, keywords FROM `mj_bots` WHERE id = $bid";
+	
+	$bdata = db_fetch_object(db_query($sql));
+	$version = $bdata->version;
+	$keywords = $bdata->keywords;
+	$scan_path = array();
+
+	if ($version == 'R20')
+	{
+		$sql = "SELECT sps_path FROM mj_sectors_paths LEFT OUTER JOIN mj_bots ON bts_sct_id = sps_sct_id WHERE id = $bid";
+		$result = db_query($sql); 
+		while($data = db_fetch_object($result))
+		{
+			$scan_path[] = $data->sps_path;
+		}
+	}
+	else
+	{
+		$scan_path[] = "C:\Repository\QAG\Bot\Releases\\$version";
+	}
+	
+	module_load_include('inc', 'reports', 'inc/reports.list');
+	
+	$scripts = array();
+
+	if (empty($keywords)){
+//		die('Keywords can\'t be null');
+		die('false');
+	}
+	
+	foreach($scan_path as $key => $val){
+		scan_path($val, $keywords, 0, &$scripts);
+	}
+
+	$unixtime = time();
+	if (!empty($scripts)){
+		foreach($scripts as $key => $val)
+		{
+			if(!is_array($val)){
+				$val = str_replace("\\", "\\\\", $val);
+				// update files
+				$sql = "INSERT INTO mj_bots_files VALUES ($bid, '$val', NULL, $unixtime) ON DUPLICATE KEY UPDATE lastfound = $unixtime";
+				db_query($sql);
+			}
+		}
+	} else {
+		// remove the files that gone
+		$sql = "DELETE FROM mj_bots_files WHERE bid = $bid ";
+		if ($unixtime > 0){
+			$sql .= " AND lastfound < $unixtime ";	
+		}
+		db_query($sql);
+	}
+	
+	list_bot_related_files($bid);
+}
+
+function zip_files($bid, $files){
+	if (empty($files)){
+		die('false');
+	}
+	
+	$zip = new ZipArchive;
+	$appendix = gmDate("Ymd\THis\Z");
+	$path = drupal_get_path('module', 'reports') . '/temp/';
+	$file =  $path . $bid . '-' . $appendix . '.zip';
+	if (!file_exists($file)){
+		if($zip->open($file, ZipArchive::CREATE)!==TRUE)
+		{
+			// Opening zip file to load files
+			die("* Sorry ZIP creation failed");
+		}
+		else {
+			foreach($files as $key => $val){
+				if (!empty($val)){
+					$zip->addFile($val);
+				}
+			}
+		}
+		$zip->close();
+	}
+	echo $file;
+/*
+	header('Content-Type: application/zip');
+	header('Content-Length: ' . filesize($file));
+	header('Content-Disposition: attachment; filename="file.zip"');
+	readfile($file);
+	//unlink($file); 
+*/
+}
+
+function check_files($bid, $files, $checked){
+	foreach($files as $key => $val){
+		if (!empty($val)){
+			$val = str_replace("\\", "\\\\", $val);
+			$sql = "UPDATE mj_bots_files SET checked = $checked WHERE bid = $bid AND file = '$val'";
+			db_query($sql);
+		}
+	}
+}
+
+function list_bot_related_files($bid){
+	// get the timestamp when files were scaned last time
+	$sql = "SELECT IFNULL(MAX(lastfound), 0) FROM mj_bots_files WHERE bid = $bid";
+	$unixtime = db_result(db_query($sql));
+	
+	// remove the files that gone
+	$sql = "DELETE FROM mj_bots_files WHERE bid = $bid ";
+	if ($unixtime > 0){
+		$sql .= " AND lastfound < $unixtime ";	
+	}
+	db_query($sql);
+	
+	// list the latest found items only
+	$sql = "SELECT file, checked FROM mj_bots_files WHERE bid = $bid ";
+	if ($unixtime > 0){
+		$sql .= " AND lastfound = $unixtime ";	
+	}
+	$sql .= "ORDER BY checked DESC, file";
+	$result = db_query($sql);
+	
+
+	
+
+	$i = 0;
+	while ($row = db_fetch_array($result))
+	{
+		$responce->f[$i]['checked']=$row[checked];
+		$responce->f[$i]['file']=$row[file] . ';' ;
+		$i++;
+	}
+	echo json_encode($responce);
+}
+
+
+function menufun_managebots()
+{
+	$op = $_POST['oper'];
+	if (!empty($op))
+	{
+		$id = $_POST['id'];
+		$priority = $_POST['priority'];
+		$botname = $_POST['botname'];
+		$botid = $_POST['bts_id'];
+		$jobid = $_POST['jobid'];
+		$qaAtBoryi = $_POST['qaAtBoryi'];
+		$qaTime = $_POST['qaTime'];
+		if (empty($_POST['qaTime']))
+		{
+			$qaTime = 'NULL';
+		}
+		if (empty($_POST['jobid']))
+		{
+			$jobid = 'NULL';
+		}
+		$sector = $_POST['sector'];
+		$version = $_POST['version'];
+		$keywords = $_POST['keywords'];
+		$keywords = str_replace("\\", "\\\\", $keywords);
+		
+		if ($op == 'add') 
+		{
+			/*  validation here*/
+			$sql = "INSERT INTO mj_bots
+				(`bts_id`, `botname`, `bts_sct_id`, `qaAtBoryi`, `qaTime`, `qaTimes`, `priority`, `jobid`, `keywords`, `version`)
+				VALUES($botid, '$botname', $sector, $qaAtBoryi, $qaTime, 0, $priority, '$jobid', '$keywords', '$version')";
+				
+			$records = db_query($sql);
+		}
+		else if ($op == 'edit') 
+		{
+			/*  validation here*/
+			$sql = "UPDATE mj_bots 
+					SET bts_id = $botid, botname = '$botname', bts_sct_id = $sector, qaAtBoryi = $qaAtBoryi, 
+						qaTime = $qaTime, priority = $priority, jobid = '$jobid', keywords = '$keywords', version = '$version'
+					WHERE id = $id";
+			$records = db_query($sql);
+		}
+	}
+	else
+	{
+		drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/redmond/jquery.ui.all.css');
+		drupal_add_js(drupal_get_path('module', 'reports') .'/js/stripe.js');
+		drupal_add_css(drupal_get_path('module', 'reports') .'/css/reports.css');
+			
+		module_load_include('inc', 'reports', 'inc/reports.view');
+		return view_report();
+	}
+}
