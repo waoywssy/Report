@@ -9,21 +9,31 @@
 		drupal_add_css($jquery_ui_path . '/jquery.ui/themes/default/ui.datepicker.css');
 		drupal_add_css($bots_path . '/files/jqGrid/themes/ui.jqgrid.css');
 		drupal_add_css($bots_path . '/css/bots.css');
+		drupal_add_css($bots_path . '/css/tree.css');
 		jquery_ui_add(array('ui.core','ui.widget','ui.button','ui.mouse','ui.draggable','ui.position','ui.dialog','ui.tabs','ui.datepicker')); // For a single file 
 		drupal_add_js($bots_path . '/files/jqGrid/js/i18n/grid.locale-en.js');
 		drupal_add_js($bots_path . '/files/jqGrid/js/jquery.jqGrid.min.js');
 		drupal_add_js("var imgPath = '$bots_path/images/';", 'inline');
 		drupal_add_js($bots_path . '/js/grid-bots.js');
+		drupal_add_js($bots_path . '/js/jquery.contextmenu.js');
 /*
 		drupal_add_js($ztree_path . '/js/jquery.ztree.core-3.3.js');
 		drupal_add_js($ztree_path . '/js/jquery.ztree.excheck-3.3.js');
 		drupal_add_js($bots_path . '/js/tree.js');
 		drupal_add_css($ztree_path . '/css/zTreeStyle/zTreeStyle.css');
 */
-		drupal_add_css($bots_path . '/css/tree.css');
+		//drupal_add_css($bots_path . '/css/tree.css');
 
 		return '<table id="botsList"></table><div id="botsPager"></div>
-				<div id="pop-up-tree" style="display:none;" title="Choose files belong to the bot"><ul id="treeDemo" class="ztree"></ul></div>';
+				<div id="pop-up-tree" style="display:none;" title="Choose files belong to the bot"><ul id="treeDemo" class="ztree"></ul></div>
+				<div class="contextMenu" id="myMenu1" style="display:none">
+					<ul style="width:200px;">
+						<li id="contextupload" style="background:none!important">
+							<span class="ui-icon ui-icon-plus" style="float:left"></span>
+							<span style="font-size:11px; font-family:Verdana">Upload</span>
+						</li>
+					</ul>
+				</div>';
 	}
 	
 	function get_data(){

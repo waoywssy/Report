@@ -142,6 +142,40 @@ jQuery().ready(function(){
 			selRowId = grid.jqGrid('getGridParam', 'selrow');
 			cm.editoptions.src = 'http://www.ok-soft-gmbh.com/img/flag_' + selRowId + '.gif';*/
 		},
+		loadComplete: function() {
+			$("tr.jqgrow", this).contextMenu('myMenu1', {
+				bindings: {
+					'contextupload': function(trigger) {
+						alert('You can upload maintenance for bot: ' + trigger.id + ' later');
+						//	alert();
+						// trigger is the DOM element ("tr.jqgrow") which are triggered
+//						grid.editGridRow(trigger.id, {});
+					},/*
+					'add': function(//trigger
+									) {
+						grid.editGridRow("new", addSettings);
+					},
+					'del': function(trigger) {
+						if ($('#del').hasClass('ui-state-disabled') === false) {
+							// disabled item can do be choosed
+							grid.delGridRow(trigger.id, delSettings);
+						}
+					}*/
+				},
+				onContextMenu: function(event) {
+					var rowId = $(event.target).closest("tr.jqgrow").attr("id");
+					//grid.setSelection(rowId);
+					// disable menu for rows with even rowids
+					$('#del').attr("disabled",Number(rowId)%2 === 0);
+					if (Number(rowId)%2 === 0) {
+						$('#del').attr("disabled","disabled").addClass('ui-state-disabled');
+					} else {
+						$('#del').removeAttr("disabled").removeClass('ui-state-disabled');
+					}
+					return true;
+				}
+			});
+		},
 		ondblClickRow:function(id){
 			var rowData = jQuery('#botsList').jqGrid('getRowData', id);
 			var bname = rowData.botname;
@@ -267,7 +301,8 @@ jQuery().ready(function(){
 		$("#lui_botsList").remove();
 		$(".data input.vdata").bind('keypress', function(event){
 				if (event.which==13){
-					alert('enter');	
+					//alert('enter');
+					$(".ui-search").click();
 				}
 			}
 		)
