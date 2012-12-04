@@ -169,7 +169,7 @@ function showTodayReports()
     $date = $_POST['date'];
     if (isset($date) && !empty($date) && strlen($date) > 0)
     {
-    $sql = "select rpt_id, issue, rdate, delivery, rpt_bts_id, botname, sector, type, time, employee from mj_reports ";
+    $sql = "select rpt_id, issue, rdate, delivery, rpt_bts_id, botname, sector, type, time, employee, comment from mj_reports ";
     $sql .= "LEFT OUTER JOIN mj_bots ON bts_id = rpt_bts_id LEFT OUTER JOIN mj_sectors ON sct_id = bts_sct_id ";
     $sql .= " where rdate = '$date' order by employee desc, type";
     
@@ -180,8 +180,8 @@ function showTodayReports()
     $space = '</td><td>';
     $totaltime = 0;
     while ($data = db_fetch_object($records)) {
-        echo '<tr><td>' . substr($data->rpt_bts_id, 0, 3) . $space . $data->botname . $space . $date .$space . $data->issue . $space . '<img src="' . drupal_get_path('module', 'reports') . '/image/drop-' . ($data->delivery == 1 ? 'yes' : 'no') .'.gif" />';
-        echo $space . $data->sector . $space . $data->type . $space . $data->time . $space . $data->employee. $space;
+        echo '<tr><td>' . substr($data->rpt_bts_id, 0, 3) . $space . $data->botname .$space . $data->issue . $space . '<img src="' . drupal_get_path('module', 'reports') . '/image/drop-' . ($data->delivery == 1 ? 'yes' : 'no') .'.gif" />';
+        echo $space . $data->sector . $space . $data->type . $space . $data->time . $space . $data->employee. $space. $data->comment. $space;
         echo '<img class="close-img" alt="' . $data->rpt_id . '" src="' . drupal_get_path('module', 'reports') . '/image/close.gif" /></td></tr>';
         $totaltime += $data->time;
     }

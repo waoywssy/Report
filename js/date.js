@@ -40,6 +40,7 @@ $(function() {
         var delivery = $("#delivery").attr("checked");
         var bot = $("#bot>option:selected").val();        
         var issue = $.trim($("#issueid").val());
+        var comment = $.trim($("#comment").val());
 		
 		if (issue.length > 0 && !issue.match(/([0-9,])+/))   
 		{
@@ -60,7 +61,7 @@ $(function() {
         
         var postdata = "employee=" + employee + "&type=" + type;
         postdata += "&time=" + time + "&date=" + date;
-        postdata += "&delivery=" + delivery + "&bot=" + bot + "&issue=" + issue;
+        postdata += "&delivery=" + delivery + "&bot=" + bot + "&issue=" + issue+ "&comment=" + comment;
         
         $.ajax({
            type: "POST",

@@ -79,7 +79,7 @@ function save_excel($date1, $date2)
 		$sql ="SELECT DISTINCT bts_id, botname, qaTime, sector, issue, date_format(rdate,\"%c/%e/%Y\") as date, delivery, type, time, employee, qatimes
 		FROM 
 		(
-			SELECT bts_id, botname, bts_sct_id, qaTime, NULL as issue, '$_today' as rdate, 0 as delivery, 'Routine QA' as type, IFNULL(time, qaTime) as time, IFNULL(employee, 'Zhihui Liu') as employee , qatimes
+			SELECT bts_id, botname, bts_sct_id, qaTime, NULL as issue, '$_today' as rdate, 0 as delivery, 'Routine QA' as type, IFNULL(time, qaTime) as time, IFNULL(employee, 'Chunrong Lei') as employee , qatimes
 			FROM (SELECT * FROM mj_bots WHERE qatimes >= %d OR bts_id in (SELECT rpt_bts_id FROM mj_reports WHERE rdate = '$_today' AND TYPE = 'Routine QA')) AS M
 			LEFT OUTER JOIN (SELECT * FROM mj_reports WHERE rdate = '$_today' AND TYPE = 'Routine QA') as T
 			ON rpt_bts_id = bts_id

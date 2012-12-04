@@ -9,27 +9,26 @@
         $time = $_POST['time'];
         $date = $_POST['date'];
         $delivery = $_POST['delivery'];
+        $comment = $_POST['comment'];
         
         $issue = $_POST['issue'];
+        
+		$employeeArray = array('', 'Gang Huang', 'Yang Song', 'Yilong Xie', 'Wei Yin', 'Chunrong Lei', 'Weilong Chen');
+		$employee = $employeeArray[$employee];
+        
+		$typesArray = array('Routine QA', 'Maintenance', 'Enhancement', 'Support', 'Development');
+		$type = $typesArray[$type];
+		
+		$commentsArray = array('Site Changed', 'Data is fine now', 'Matches the site', 'Bug fixed', 'Others');
+		$comment = $commentsArray[$comment];
 
-        if($employee==1){$employee='Gang Huang';}
-        else if($employee==2){$employee='Yang Song';}
-        else if($employee==3){$employee='Yilong Xie';}
-        else if($employee==4){$employee='Wei Yin';}
-        else if($employee==5){$employee='Zhihui Liu';}
-        
-        if($type==1){$type='Maintenance';}
-        else if($type==2){$type='Enhancement';}
-        else if($type==3){$type='Support';}
-        else if($type==4){$type='Development';} 
-        else if($type==0){$type='Routine QA';} 
-        
         $sql = "select * from mj_reports where rdate = '$date' and rpt_bts_id = $bot and type = '$type' and employee = '$employee'";
 
 		$result = db_fetch_object(db_query($sql));
 		if (!$result)
 		{
-			$sql = "insert into mj_reports values(null, $bot, '$issue', '$date', $delivery, '$type', $time, '$employee')";
+			$sql = "insert into mj_reports values(null, $bot, '$issue', '$date', $delivery, '$type', $time, '$employee', '$comment')";
+			//echo $sql;
 			db_query($sql);
 		}
 		else

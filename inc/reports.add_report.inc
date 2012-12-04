@@ -18,7 +18,8 @@
 		$result .= t('Time cost: <input id="time" type="text" style="border:1; color:#f6931f; font-weight:bold;" />&nbsp;hour(s)&nbsp;&nbsp;&nbsp;<div id="slider-range-min" style="width:260px"></div>');
 		$result .= t('<br />Report Type: <select id="type"><option value="1">Maintenance</option><option value="2">Enhancement</option><option value="3">Support</option><option value="4">Development</option><option value="0">Routine QA</option></select>&nbsp;&nbsp;&nbsp;&nbsp;');
 		//<option value="1">Gang Huang</option>
-		$result .= t('By: <select id="employee"><option value="3">Yilong Xie</option><option value="4">Wei Yin</option><option value="5">Zhihui Liu</option><option value="2">Yang Song</option></select><br /><br /><br />');
+		$result .= t('By: <select id="employee"><option value="3">Yilong Xie</option><option value="4">Wei Yin</option><option value="5">Chunrong Lei</option><option value="6">Weilong Chen</option><option value="2">Yang Song</option></select>&nbsp;&nbsp;&nbsp;&nbsp;');
+		$result .= t('Comment: <select id="comment"><option value="0">Site Changed</option><option value="1">Data is fine now</option><option value="2">Matches the site</option><option value="3">Bug fixed</option><option value="4">Others</option></select><br /><br /><br />');
 		$result .= t('&nbsp;&nbsp;<button id="add">Add</button>&nbsp;&nbsp;<br /><br />');
 		$result .= t('</p>');
 		$result .= t('<p><div id="reports-grid"></div></p>');
