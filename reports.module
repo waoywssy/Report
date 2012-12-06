@@ -1,73 +1,75 @@
 <?php
+
 function reports_menu() {
+
     $items['show'] = array(
         'page callback' => 'showTodayReports',
-        'access callback' => TRUE,
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     );
     $items['report'] = array(
         'page callback' => 'menufun_add_report',
-        'access callback' => TRUE,
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     );
     $items['view'] = array(
         'page callback' => 'menufun_view_report',
-        'access callback' => TRUE,
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     );
 	$items['viewbots'] = array(
         'page callback' => 'menufun_view_bots',
-        'access callback' => TRUE,
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     );
 	$items['setpath'] = array(
         'page callback' => 'menufun_set_path',
-        'access callback' => TRUE,
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     );
     $items['add'] = array(
         'page callback' => 'menufun_add',
-        'access callback' => TRUE,
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     );
     $items['remove'] = array(
         'page callback' => 'menufun_remove',
-        'access callback' => TRUE,
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     );
     $items['generate'] = array(
         'page callback' => 'menufun_generate',
-        'access callback' => TRUE,
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     );   
 	$items['bots'] = array(
         'page callback' => 'menufun_handler',
-        'access callback' => TRUE,
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     ); 
 	$items['managebots'] = array(
         'page callback' => 'menufun_managebots',
-        'access callback' => TRUE,
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     ); 
 	$items['displayfiles'] = array(
         'page callback' => 'displayfiles',
-        'access callback' => TRUE,
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     ); 
 	$items['scan'] = array(
         'page callback' => 'menufun_scan',
-        'access callback' => TRUE,
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     );	
 	$items['path'] = array(
         'page callback' => 'menufun_path_js',
-        'access callback' => TRUE,
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     );
 	$items['sectors'] = array(
         'page callback' => 'menufun_load_sectors',
-        'access callback' => TRUE,
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     );
 	
@@ -85,6 +87,12 @@ function reports_menu() {
 
     return $items;
 }
+
+function report_user_access(){
+  global $user;
+  return in_array('authenticated user',$user->roles);
+}
+
 function menufun_load_sectors(){
 	//$sectors = array();
 	$sql = "select sct_id as id, sector from mj_sectors";
