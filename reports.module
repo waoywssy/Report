@@ -39,7 +39,7 @@ function reports_menu() {
     );
     $items['generate'] = array(
         'page callback' => 'menufun_generate',
-        'access callback' => 'report_user_access',
+        'access callback' => 'report_admin_access',
         'type' => MENU_CALLBACK,
     );   
 	$items['bots'] = array(
@@ -90,7 +90,11 @@ function reports_menu() {
 
 function report_user_access(){
   global $user;
-  return in_array('authenticated user',$user->roles);
+  return in_array('itg_developer',$user->roles);
+}
+function report_admin_access(){
+  global $user;
+  return in_array('itg_admin',$user->roles);
 }
 
 function menufun_load_sectors(){
@@ -175,6 +179,7 @@ function displayfiles()
 function showTodayReports()
 {
     $date = $_POST['date'];
+    
     if (isset($date) && !empty($date) && strlen($date) > 0)
     {
     $sql = "select rpt_id, issue, rdate, delivery, rpt_bts_id, botname, sector, type, time, employee, comment from mj_reports ";
