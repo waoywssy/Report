@@ -89,7 +89,7 @@ function save_excel($date1, $date2)
 			LEFT OUTER JOIN mj_bots ON bts_id = rpt_bts_id 
 		) AS C
 		LEFT OUTER JOIN mj_sectors on bts_sct_id = sct_id
-		order by type desc, qatimes desc, sector, botname";
+		order by type desc, employee, qatimes desc, sector, botname";
 	
 		// change color for each day
 		$qacolor = ($qacolor == $qacolor_odd) ? $qacolor_even : $qacolor_odd;
@@ -169,8 +169,9 @@ function save_excel($date1, $date2)
 			}
 			
 			$current_row++;
+			$tmp_id = substr($data->bts_id, 0, 3);
 			$objPHPExcel->setActiveSheetIndex(0)
-						->setCellValue('A' . $current_row, substr($data->bts_id, 0, 3)) // ID
+						->setCellValue('A' . $current_row, $tmp_id > 0 ? $tmp_id : '') // ID
 						->setCellValue('B' . $current_row, $data->issue)          // Issue ID
 						->setCellValue('C' . $current_row, $data->date)           // Date
 						->setCellValue('D' . $current_row, ($data->delivery == 1) ? $data->date:'')    // Delivery Date
