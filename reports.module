@@ -283,6 +283,9 @@ function menufun_generate()
 	$date1 = '';
 	$date2 = '';
 
+	$employee = array('Yang Song'=>'Yang', 'Wei Yin' => 'Wei', 'Weilong Chen' => 'Weilong', 'Yilong Xie'=> 'Yilong');
+
+
     $type = $_POST['type'];
 
 	if ($type == 1){
@@ -298,29 +301,59 @@ function menufun_generate()
 	    }
 	}
 	else{
+		$new = $_POST['new'];	// if asks for new tasks
+		$svn = $_POST['svn'];	// if SVN failed to commit
 	    $date = $_POST['date'];
 	    if (isset($date) && !empty($date) && strlen($date) > 0){
 	    	$sql = "SELECT issue, delivery, type, employee, comment, botname FROM `mj_reports` left outer join `mj_bots` on bts_id = rpt_bts_id WHERE `rdate` = '$date' and type<> 'Routine QA'
 				order by employee, delivery desc";
 
-	    	$output = 'Daily repot of ' . $date . ':<br />';
+	    	$output = 'Daily repot of ' . $date . ':<br /><br />';
+
+	    	$output .= 'Hi Ian and Jesse,<br/>';
+	    	$output .= 'Here is a summary of today\'s work:<br/><br/>';
 
 			$result = db_query($sql); 
 			$index = 1;
 			while($data = db_fetch_object($result))
 			{
 				$output .= $index++ . ') ';
-				$output .= $data->issue;
-				$output .= $data->delivery;
-				$output .= $data->type;
-				$output .= $data->employee;
-				$output .= $data->comment;
-				$output .= $data->botname;
+				$output .= $employee["$data->employee"] . ' ';
+				$output .= ' has ';
+				
+				if($data->delivery == 1 ){
+					$output .='delivered the ';
+				}
+				else {
+					if ($data->comment=='Site Changed'){
+						$output .='been working on the ';		
+					}
+					else{
+						$output .='done the ';			
+					}
+				}
+
+				$output .= strtolower($data->type);
+				$output .= ' of <b>' . $data->botname . '</b> bot';
+
+				if (!empty($data->issue)){
+					$output .= '(issue ' . $data->issue . ')';
+				}
+
+				$output .= '. '. $data->comment . '.';
+				$output .= $data->delivery == 1 ? ' Please deploy.':'';
 				$output .= '<br />';
 			}
+			if (isset($svn)){
+				$output .= '<br/>The SVN server just runs out of disk space and we failed to commit todays scripts. Please check.<br/>';
+			}
+			if (isset($new)){
+				$output .= '<br/>We have finished most of the development/maintenance tasks again. Please assign new tasks to boryi. Thanks. <br/>';
+			}
+			
 
-
-			$output .= '';
+			$output .= '<br/>best wishes,<br/>';
+			$output .= '<br/>Yang';
 	    }
 	}
     
@@ -340,6 +373,8 @@ function menufun_generate()
 	$result .= t('Date: <input id="date" name="date" type="text" value="' . $date . '" />');
 	$result .= t('&nbsp;&nbsp;<button id="getdailyreport" type="submit">GetDailyReport</button>&nbsp;&nbsp;<br /><br />');
 	$result .= t('<input id="type" name="type" type="hidden" value="0" />');
+	$result .= t('Ask for New Tasks? <input type="checkbox" id="new" name="new"/>');
+	$result .= t('SVN failed? <input type="checkbox" id="svn" name="svn" />');
     $result .= t('</form>');
 	$result .= t('<br /><br />');
     $result .= t($output);
