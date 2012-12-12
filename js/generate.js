@@ -1,4 +1,12 @@
 $(function() {
+	$("#date").datepicker({
+		dateFormat:'yy-mm-dd',
+		beforeShow: function(input, datepicker) {
+				setTimeout(function() {
+					$(datepicker.dpDiv).css('zIndex', 100);
+				}, 200);
+			}
+		});
 	$("#fromdate").datepicker({
 		dateFormat:'yy-mm-dd',
 		beforeShow: function(input, datepicker) {
@@ -38,10 +46,25 @@ $(function() {
 				required: "Please enter a from date",
 				minlength: "Your from date must like 'yyyy-mm-dd'"
 			},
-			password: {
+			todate: {
 				required: "Please enter a to date",
 				minlength: "Your to date must like 'yyyy-mm-dd'"
 			}
+		}
+	});
+
+	$("#dateform").validate({
+		rules: {
+			date: {
+				required: true,
+				minlength: 2
+			},
+		},
+		messages: {
+			date: {
+				required: "Please enter a from date",
+				minlength: "Your from date must like 'yyyy-mm-dd'"
+			},
 		}
 	});
 });

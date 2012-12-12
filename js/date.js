@@ -8,6 +8,19 @@ $(function() {
 			$("#time").val(ui.value);
 		}
 	});
+
+	$("#type").change(
+		function(){
+			// No comments for 'development' and 'routineQA'
+			if($(this).val() == 0 || $(this).val() == 4){
+				$('#sp_comment').hide();
+			}
+			else{
+				$('#sp_comment').show();
+			}
+		}
+	);
+
 	$("#time").val($("#slider-range-min").slider("value"));
 	
 	
@@ -41,6 +54,11 @@ $(function() {
         var bot = $("#bot>option:selected").val();        
         var issue = $.trim($("#issueid").val());
         var comment = $.trim($("#comment").val());
+
+		// No comments for 'development' and 'routineQA'
+        if(type==0 || type==4){
+        	comment='';
+        }
 		
 		if (issue.length > 0 && !issue.match(/([0-9,])+/))   
 		{
@@ -146,5 +164,5 @@ $(function() {
 			}
 		}
 	});
-    
+
 });

@@ -277,24 +277,72 @@ function menufun_generate()
     jquery_ui_add('ui.datepicker');  // For a single file
     drupal_add_js(drupal_get_path('module', 'reports') .'/js/jquery.validate.js');
     drupal_add_js(drupal_get_path('module', 'reports') .'/js/generate.js');
-        
-    $date1 = $_POST['fromdate'];
-    $date2 = $_POST['todate'];
 
-    if ((isset($date1) && !empty($date1) && strlen($date1) > 0)
-		&& isset($date2) && !empty($date2) && strlen($date2) > 0)
-    {
-		module_load_include('inc', 'reports', 'inc/reports.generate');
-	    require_once 'files/Classes/PHPExcel.php';
-        return  save_excel($date1, $date2);
-    }
+	$output='';
+	$date = '';
+	$date1 = '';
+	$date2 = '';
+
+    $type = $_POST['type'];
+
+	if ($type == 1){
+		// weekly report 
+		$date1 = $_POST['fromdate'];
+	    $date2 = $_POST['todate'];
+
+	    if ((isset($date1) && !empty($date1) && strlen($date1) > 0)
+			&& isset($date2) && !empty($date2) && strlen($date2) > 0){
+			module_load_include('inc', 'reports', 'inc/reports.generate');
+		    require_once 'files/Classes/PHPExcel.php';
+	        return  save_excel($date1, $date2);
+	    }
+	}
+	else{
+	    $date = $_POST['date'];
+	    if (isset($date) && !empty($date) && strlen($date) > 0){
+	    	$sql = "SELECT issue, delivery, type, employee, comment, botname FROM `mj_reports` left outer join `mj_bots` on bts_id = rpt_bts_id WHERE `rdate` = '$date' and type<> 'Routine QA'
+				order by employee, delivery desc";
+
+	    	$output = 'Daily repot of ' . $date . ':<br />';
+
+			$result = db_query($sql); 
+			$index = 1;
+			while($data = db_fetch_object($result))
+			{
+				$output .= $index++ . ') ';
+				$output .= $data->issue;
+				$output .= $data->delivery;
+				$output .= $data->type;
+				$output .= $data->employee;
+				$output .= $data->comment;
+				$output .= $data->botname;
+				$output .= '<br />';
+			}
+
+
+			$output .= '';
+	    }
+	}
+    
     
     $result = '';
+    // weekly report from
+    $result .= t('Weekly Report:');
     $result .= t('<form id="datesform" name="datesform" action="#" method="post" />');
     $result .= t('From Date: <input id="fromdate" name="fromdate" type="text" />');
     $result .= t('To Date: <input id="todate" name="todate" type="text" />');
-    $result .= t('&nbsp;&nbsp;<button id="generate" type="submit">Generate</button>&nbsp;&nbsp;<br /><br />');
+    $result .= t('&nbsp;&nbsp;<button id="generate" type="submit">GetWeeklyReport</button>&nbsp;&nbsp;<br /><br />');
+    $result .= t('<input id="type" name="type" type="hidden" value="1" />');
     $result .= t('</form>');
+	// daily report from
+	$result .= t('Daily Report:');
+	$result .= t('<form id="dateform" name="dateform" action="#" method="post" />');
+	$result .= t('Date: <input id="date" name="date" type="text" value="' . $date . '" />');
+	$result .= t('&nbsp;&nbsp;<button id="getdailyreport" type="submit">GetDailyReport</button>&nbsp;&nbsp;<br /><br />');
+	$result .= t('<input id="type" name="type" type="hidden" value="0" />');
+    $result .= t('</form>');
+	$result .= t('<br /><br />');
+    $result .= t($output);
     return $result;
 }
 
