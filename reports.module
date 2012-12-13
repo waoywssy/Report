@@ -310,7 +310,7 @@ function menufun_generate()
 
 	    	$output = 'Daily repot of ' . $date . ':<br /><br />';
 
-	    	$output .= 'Hi Ian and Jesse,<br/>';
+	    	$output .= 'Hi Ian and Jesse,<br/><br/>';
 	    	$output .= 'Here is a summary of today\'s work:<br/><br/>';
 
 			$result = db_query($sql); 
@@ -339,16 +339,18 @@ function menufun_generate()
 				if (!empty($data->issue)){
 					$output .= '(issue ' . $data->issue . ')';
 				}
-
-				$output .= '. '. $data->comment . '.';
+				$output .= '.';
+				if (!empty($data->comment)){
+					$output .= ' ' . $data->comment . '.';
+				}
 				$output .= $data->delivery == 1 ? ' Please deploy.':'';
 				$output .= '<br />';
 			}
 			if (isset($svn)){
-				$output .= '<br/>The SVN server just runs out of disk space and we failed to commit todays scripts. Please check.<br/>';
+				$output .= '<br/>The SVN server just runs out of disk space again and we failed to commit todays scripts. Please check.<br/>';
 			}
 			if (isset($new)){
-				$output .= '<br/>We have finished most of the development/maintenance tasks again. Please assign new tasks to boryi. Thanks. <br/>';
+				$output .= '<br/>We have finished most of the development/maintenance tasks. Please assign new tasks to boryi. Thanks. <br/>';
 			}
 			
 

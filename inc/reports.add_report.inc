@@ -8,18 +8,39 @@
 		{
 			$bots .= '<option value=' . $data->bts_id . '>' . $data->botname . '</option>';
 		}
+
+		$comments = '';	
+		$sql = 'SELECT `cmt_id`, `cmt_comment` FROM `mj_comments` order by cmt_id';
+		$result = db_query($sql);
+		while ($data = db_fetch_object($result))
+		{
+			$comments .= '<option value=' . $data->cmt_id . '>' . $data->cmt_comment . '</option>';
+		}
 		
+		$employee = '';	
+		$sql = 'SELECT `emp_id`,`emp_name`,`emp_uid` FROM `mj_employee` ORDER BY emp_name';
+		$result = db_query($sql);
+		global $user;
+		//var_dump($user);
+		while ($data = db_fetch_object($result))
+		{
+			$employee .= '<option value=' . $data->emp_id;
+			if ($user->uid == $data->emp_uid){
+			 	$employee .= ' selected="selected"';
+			}
+			$employee .= ' >' . $data->emp_name . '</option>';
+		}
+
 		$result = '';
 		$result .= t('<p>Issue Id: <input id="issueid" type="text" />&nbsp;&nbsp;&nbsp;&nbsp;');
 		$result .= t('Bot: <select id="bot">' . $bots . '</select>&nbsp;&nbsp;&nbsp;&nbsp;');
 		$result .= t('Delivery: <input id="delivery" type="checkbox" />&nbsp;&nbsp;&nbsp;&nbsp;');
-		$result .= t('Report Date: <input id="datepicker" type="text" /><br /><br /><br />');
+		$result .= t('Report Date: <input id="datepicker" type="text" value="' . date("Y-m-d") . '" /><br /><br /><br />');
 		
 		$result .= t('Time cost: <input id="time" type="text" style="border:1; color:#f6931f; font-weight:bold;" />&nbsp;hour(s)&nbsp;&nbsp;&nbsp;<div id="slider-range-min" style="width:260px"></div>');
 		$result .= t('<br />Report Type: <select id="type"><option value="1">Maintenance</option><option value="2">Enhancement</option><option value="3">Support</option><option value="4">Development</option><option value="0">Routine QA</option></select>&nbsp;&nbsp;&nbsp;&nbsp;');
-		//<option value="1">Gang Huang</option>
-		$result .= t('By: <select id="employee"><option value="3">Yilong Xie</option><option value="4">Wei Yin</option><option value="5">Chunrong Lei</option><option value="6">Weilong Chen</option><option value="2">Yang Song</option></select>&nbsp;&nbsp;&nbsp;&nbsp;');
-		$result .= t('Comment: <select id="comment"><option value="0">Site Changed</option><option value="1">Data is fine now</option><option value="2">Matches the site</option><option value="3">Bug fixed</option><option value="4">Others</option></select><br /><br /><br />');
+		$result .= t('By: <select id="employee">' . $employee . '</select>&nbsp;&nbsp;&nbsp;&nbsp;');
+		$result .= t('<span id="sp_comment">Comment: <select id="comment">' . $comments . '</select></span><br /><br /><br />');
 		$result .= t('&nbsp;&nbsp;<button id="add">Add</button>&nbsp;&nbsp;<br /><br />');
 		$result .= t('</p>');
 		$result .= t('<p><div id="reports-grid"></div></p>');

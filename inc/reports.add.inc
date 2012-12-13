@@ -19,8 +19,16 @@
 		$typesArray = array('Routine QA', 'Maintenance', 'Enhancement', 'Support', 'Development');
 		$type = $typesArray[$type];
 		
-		$commentsArray = array('Site Changed', 'Data is fine now', 'Matches the site', 'Bug fixed', 'Others');
+
+		$sql = "SELECT `cmt_comment` FROM `mj_comments` WHERE `cmt_id` = $comment";
+		//var_dump($sql);
+		$comment = db_result(db_query($sql));
+
+/*
+		$commentsArray = array('Site Changed', 'Data is fine now', 'Matches the site', 'Bug fixed', 'Issue Checked, no maintenance', 'Others');
 		$comment = $commentsArray[$comment];
+*/
+
 
         $sql = "select * from mj_reports where rdate = '$date' and rpt_bts_id = $bot and type = '$type' and employee = '$employee'";
 
