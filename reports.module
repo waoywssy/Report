@@ -182,7 +182,7 @@ function showTodayReports()
     
     if (isset($date) && !empty($date) && strlen($date) > 0)
     {
-    $sql = "select rpt_id, issue, rdate, delivery, rpt_bts_id, botname, sector, type, time, employee, comment from mj_reports ";
+    $sql = "select rpt_id, issue, rdate, delivery, rpt_bts_id, botname, sector, type, time, employee, comment, others from mj_reports ";
     $sql .= "LEFT OUTER JOIN mj_bots ON bts_id = rpt_bts_id LEFT OUTER JOIN mj_sectors ON sct_id = bts_sct_id ";
     $sql .= " where rdate = '$date' order by employee desc, type";
     
@@ -305,7 +305,7 @@ function menufun_generate()
 		$svn = $_POST['svn'];	// if SVN failed to commit
 	    $date = $_POST['date'];
 	    if (isset($date) && !empty($date) && strlen($date) > 0){
-	    	$sql = "SELECT issue, delivery, type, employee, comment, botname FROM `mj_reports` left outer join `mj_bots` on bts_id = rpt_bts_id WHERE `rdate` = '$date' and type<> 'Routine QA'
+	    	$sql = "SELECT issue, delivery, type, employee, comment, botname, others FROM `mj_reports` left outer join `mj_bots` on bts_id = rpt_bts_id WHERE `rdate` = '$date' and type<> 'Routine QA'
 				order by employee, delivery desc";
 
 	    	$output = 'Daily repot of ' . $date . ':<br /><br />';
@@ -321,20 +321,29 @@ function menufun_generate()
 				$output .= $employee["$data->employee"] . ' ';
 				$output .= ' has ';
 				
+				$skip_type = false;
 				if($data->delivery == 1 ){
 					$output .='delivered the ';
 				}
 				else {
-					if ($data->comment=='Site Changed'){
+					if ($data->comment=='Still working on it'){
 						$output .='been working on the ';		
 					}
+					else if ($data->comment=='Site Changed'){
+						$output .=' done the ';
+					}
 					else{
-						$output .='done the ';			
+						$output .='checked the ';
+						$skip_type = true;
+					}
+					if ($data->comment=='Others'){
+						$data->comment = $data->others;
 					}
 				}
-
-				$output .= strtolower($data->type);
-				$output .= ' of <b>' . $data->botname . '</b> bot';
+				if (!$skip_type){
+					$output .= strtolower($data->type) . ' of ';
+				}
+				$output .= '<b>' . $data->botname . '</b> bot';
 
 				if (!empty($data->issue)){
 					$output .= '(issue ' . $data->issue . ')';
@@ -579,6 +588,7 @@ function menufun_managebots()
 		$jobid = $_POST['jobid'];
 		$qaAtBoryi = $_POST['qaAtBoryi'];
 		$qaTime = $_POST['qaTime'];
+		$qaFreq = $_POST['qaFreq'];
 		if (empty($_POST['qaTime']))
 		{
 			$qaTime = 'NULL';
@@ -597,7 +607,7 @@ function menufun_managebots()
 			/*  validation here*/
 			$sql = "INSERT INTO mj_bots
 				(`bts_id`, `botname`, `bts_sct_id`, `qaAtBoryi`, `qaTime`, `qaTimes`, `priority`, `jobid`, `keywords`, `version`)
-				VALUES($botid, '$botname', $sector, $qaAtBoryi, $qaTime, 0, $priority, '$jobid', '$keywords', '$version')";
+				VALUES($botid, '$botname', $sector, $qaAtBoryi, $qaTime, $qaFreq, $priority, '$jobid', '$keywords', '$version')";
 				
 			$records = db_query($sql);
 		}
@@ -606,7 +616,7 @@ function menufun_managebots()
 			/*  validation here*/
 			$sql = "UPDATE mj_bots 
 					SET bts_id = $botid, botname = '$botname', bts_sct_id = $sector, qaAtBoryi = $qaAtBoryi, 
-						qaTime = $qaTime, priority = $priority, jobid = '$jobid', keywords = '$keywords', version = '$version'
+						qaTime = $qaTime, qaTimes = $qaFreq, priority = $priority, jobid = '$jobid', keywords = '$keywords', version = '$version'
 					WHERE id = $id";
 			$records = db_query($sql);
 		}

@@ -10,6 +10,7 @@
         $date = $_POST['date'];
         $delivery = $_POST['delivery'];
         $comment = $_POST['comment'];
+		$others = $_POST['others'];
         
         $issue = $_POST['issue'];
         
@@ -35,7 +36,7 @@
 		$result = db_fetch_object(db_query($sql));
 		if (!$result)
 		{
-			$sql = "insert into mj_reports values(null, $bot, '$issue', '$date', $delivery, '$type', $time, '$employee', '$comment')";
+			$sql = "insert into mj_reports values(null, $bot, '$issue', '$date', $delivery, '$type', $time, '$employee', '$comment', '$others')";
 			//echo $sql;
 			db_query($sql);
 		}

@@ -78,21 +78,21 @@
 		// typical case is that the user type 0 for the requested page
 		if($start < 0) $start = 0;
 		
-		$sql = "SELECT id, bts_id, botname, sector, qaAtBoryi, qaTime, priority, jobid, keywords, version
+		$sql = "SELECT id, bts_id, botname, sector, qaAtBoryi, qaTimes as qaFreq, qaTime, priority, jobid, keywords, version
 			FROM
 			(
-				SELECT id, bts_id, botname, sector, qaAtBoryi, qaTime, Priority, 0 AS Order1 , jobid, keywords, version
+				SELECT id, bts_id, botname, sector, qaAtBoryi, qaTimes, qaTime, Priority, 0 AS Order1 , jobid, keywords, version
 				FROM mj_bots 
 				LEFT OUTER JOIN mj_sectors on bts_sct_id = sct_id
 				WHERE Priority IS NOT NULL
 				UNION
-				SELECT id, bts_id, botname, sector, qaAtBoryi, qaTime, Priority, 1 AS Order1 , jobid, keywords, version
+				SELECT id, bts_id, botname, sector, qaAtBoryi, qaTimes, qaTime, Priority, 1 AS Order1 , jobid, keywords, version
 				FROM mj_bots 
 				LEFT OUTER JOIN mj_sectors on bts_sct_id = sct_id
 				WHERE Priority IS NULL
 			) AS M WHERE 1 ";
 			
-				if ($search_oper=='cn' && !empty($search_str)){
+		if ($search_oper=='cn' && !empty($search_str)){
 //			$sql .= " AND $search_field LIKE '%" . $search_str . "%' ";
 //			there is a bug using 'like', part of the botname can't be matched, 
 //			should be resolved later
@@ -138,6 +138,7 @@
 								$row->botname,
 								$row->sector,
 								$row->qaAtBoryi,
+								$row->qaFreq,
 								$row->qaTime,
 								$priority,
 								$row->jobid,

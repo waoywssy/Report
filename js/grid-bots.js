@@ -11,8 +11,14 @@ function check_name(){
 function check_version(version_value){
 	$("#sector").attr('disabled', version_value == 'R20' ? '' : 'disabled');
 }
+function check_qa(checked){
+	$("#qaFreq").attr('disabled', checked == 1 ? '' : 'disabled');
+}
 var on_version_change = function(e){
 	check_version($(e.target).val());
+}
+var on_qa_change = function(e){
+	check_qa($(e.target).val());
 }
 function enable_confirm_button(){
 	$($('.ui-dialog-buttonset button').get(1)).attr('disabled', false).removeClass("ui-state-disabled");
@@ -105,7 +111,7 @@ jQuery().ready(function(){
 	var botsView = jQuery("#botsList").jqGrid({
 		url:targetPath,
 		datatype: "json",
-		colNames:['Id', 'Bot Id','Bot Name', 'Sector', 'QA at Boryi?','QA Time','Priority','JobId', 'Keywords', 'Version'], 
+		colNames:['Id', 'Bot Id','Bot Name', 'Sector', 'QA at Boryi?', 'QA Frequency','QA Time','Priority','JobId', 'Keywords', 'Version'], 
 		colModel:[ 
 				{name:'id', index:'id', width:0, editable: true, hidden:true, search:false, },
 				{name:'bts_id', index:'bts_id', width:10, editable: true, editrules:{number:true, required:true, maxValue:99999, custom:true, custom_func:check_id,}, search:false, searchoptions:{sopt:['eq'], searchOnEnter:true}}, 
@@ -114,6 +120,13 @@ jQuery().ready(function(){
 						editoptions: { value: "1:E-Commerce;2:Retail - Softline ;3:Retail - Hardline ;4:Medical Devices;5:Telecommunications;6:Lodging;7:Auto Retail;8:Video Games;9:Real Estate;10:Store Locators;11:AirLines;12:R&D;13:Homebuilders;14:Mobile Phone;15:FExchange;16:Consumer Technology;20:Restaurant;19:KeywordSearches;22:Cable And Satellite"/*21:SocialNetworking;*/ },
 						search:false, },
 				{name:'qaAtBoryi', index:'qaAtBoryi', width:20, editable: true, edittype:"checkbox",editoptions: { value: "1:0", },search:false, defval:"1",}, 
+				{name:'qaFreq', index:'version', width:30, editable: true, edittype:"select",
+						editoptions: { value: "20:Daily;4:Weekly;8:Twice a Week;1:Monthly", 
+										/*dataEvents: [{ type: 'change', fn: on_version_change },
+													 { type: 'select', fn: on_version_change },	]*/
+													 },
+						search:false, 
+				},
 				{name:'qaTime', index:'qaTime', width:20, editable: true, align:"center",editrules:{number:true, required:false, maxValue:1.0, minValue:0,}, search:false, }, 
 				{name:'priority', index:'priority', width:35, editable: true, edittype:"select",
 						editoptions: { value: "1:Most Important;2:Very Important;3:Important;4:Less Important;5:Least Important"},search:false, }, 
@@ -287,6 +300,7 @@ jQuery().ready(function(){
 				closeAfterEdit:true,
 				beforeShowForm:function(){
 						check_version($('#version').val());
+						//check_version(0+($('#qaAtBoryi').attr('checked')==checked);
 						// when change to previous record or next record
 						$('#pData, #nData').bind('click', function(){
 								check_version($('#version').val());

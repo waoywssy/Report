@@ -20,6 +20,18 @@ $(function() {
 			}
 		}
 	);
+	$('#sp_others').hide();
+	$("#comment").change(
+		function(){
+			// if comment is 'others', please fill in the blank
+			if($(this).val() == 6){
+				$('#sp_others').show();
+			}
+			else{
+				$('#sp_others').hide();
+			}
+		}
+	);
 
 	$("#time").val($("#slider-range-min").slider("value"));
 	
@@ -54,13 +66,21 @@ $(function() {
         var bot = $("#bot>option:selected").val();        
         var issue = $.trim($("#issueid").val());
         var comment = $.trim($("#comment").val());
+        var others = $.trim($("#others").val());
 
 		// No comments for 'development' and 'routineQA'
         if(type==0 || type==4){
         	comment='';
         }
-		
-		if (issue.length > 0 && !issue.match(/([0-9,])+/))   
+        if (comment==6 && others.length < 20){
+        	alert('Please type your comments, at least 20 chars!');
+			return;	
+        }
+        if (comment!=6){
+        	other = '';
+        }
+
+		if (issue.length > 0 && !issue.match(/([0-9,])+/))
 		{
 			alert('Wrong issue type, format: "1234" or "2345, 3456..."');
 			return;
@@ -79,7 +99,7 @@ $(function() {
         
         var postdata = "employee=" + employee + "&type=" + type;
         postdata += "&time=" + time + "&date=" + date;
-        postdata += "&delivery=" + delivery + "&bot=" + bot + "&issue=" + issue+ "&comment=" + comment;
+        postdata += "&delivery=" + delivery + "&bot=" + bot + "&issue=" + issue+ "&comment=" + comment+ "&others=" + others;;
         
         $.ajax({
            type: "POST",
