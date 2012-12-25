@@ -472,6 +472,16 @@ function scan_files($bid){
 	}
 	
 	foreach($scan_path as $key => $val){
+		if (strpos($val, '\Config') !== false)
+		{
+			// attach the config files
+			$sql = "SELECT scf_sct_config AS config FROM `mj_bots` LEFT OUTER JOIN mj_sectors_configs ON scf_sct_id = bts_sct_id WHERE id = $bid";
+			$result = db_query($sql); 
+			while($data = db_fetch_object($result))
+			{
+				$scripts[] = $val . '\\' . $data->config;
+			}
+		}
 		scan_path($val, $keywords, 0, &$scripts);
 	}
 
@@ -603,7 +613,11 @@ function menufun_managebots()
 		$keywords = str_replace("\\", "\\\\", $keywords);
 		
 		if ($op == 'add') 
-		{
+		{/*
+			global $user;
+			var_dump($user);*/
+			watchdog('add', serialize($_POST));
+
 			/*  validation here*/
 			$sql = "INSERT INTO mj_bots
 				(`bts_id`, `botname`, `bts_sct_id`, `qaAtBoryi`, `qaTime`, `qaTimes`, `priority`, `jobid`, `keywords`, `version`)
@@ -613,6 +627,8 @@ function menufun_managebots()
 		}
 		else if ($op == 'edit') 
 		{
+			watchdog('edit', serialize($_POST));
+
 			/*  validation here*/
 			$sql = "UPDATE mj_bots 
 					SET bts_id = $botid, botname = '$botname', bts_sct_id = $sector, qaAtBoryi = $qaAtBoryi, 

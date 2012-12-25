@@ -120,7 +120,7 @@ jQuery().ready(function(){
 						editoptions: { value: "1:E-Commerce;2:Retail - Softline ;3:Retail - Hardline ;4:Medical Devices;5:Telecommunications;6:Lodging;7:Auto Retail;8:Video Games;9:Real Estate;10:Store Locators;11:AirLines;12:R&D;13:Homebuilders;14:Mobile Phone;15:FExchange;16:Consumer Technology;20:Restaurant;19:KeywordSearches;22:Cable And Satellite"/*21:SocialNetworking;*/ },
 						search:false, },
 				{name:'qaAtBoryi', index:'qaAtBoryi', width:20, editable: true, edittype:"checkbox",editoptions: { value: "1:0", },search:false, defval:"1",}, 
-				{name:'qaFreq', index:'version', width:30, editable: true, edittype:"select",
+				{name:'qaFreq', index:'qaFreq', width:30, editable: true, edittype:"select",
 						editoptions: { value: "20:Daily;4:Weekly;8:Twice a Week;1:Monthly", 
 										/*dataEvents: [{ type: 'change', fn: on_version_change },
 													 { type: 'select', fn: on_version_change },	]*/
@@ -139,9 +139,9 @@ jQuery().ready(function(){
 						search:false, 
 				},
 				],
-		rowNum:20,
+		rowNum:10,
 		autowidth:true,
-		rowList:[15,30,60],
+		rowList:[10,30,60],
 		pager:$('#botsPager'),
 		gridComplete: function(){
 			var ids = $("#botsList").jqGrid('getDataIDs');

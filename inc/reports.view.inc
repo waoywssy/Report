@@ -131,14 +131,29 @@
 			else if ($row->priority == 5){
 				$priority = 'Least Important';
 			}
-				
+			//"20:Daily;4:Weekly;8:Twice a Week;1:Monthly", 
+
+			$qaFreq = '';
+			if ($row->qaFreq == 1){
+				$qaFreq = 'Monthly';
+			}
+			else if ($row->qaFreq == 4){
+				$qaFreq = 'Weekly';
+			}			
+			else if ($row->qaFreq == 8){
+				$qaFreq = 'Twice a Week';
+			}			
+			else if ($row->qaFreq == 20){
+				$qaFreq = 'Daily';
+			}
+
 			$responce->rows[$i]['cell']=array(
 								$row->id,
 								$row->bts_id,
 								$row->botname,
 								$row->sector,
 								$row->qaAtBoryi,
-								$row->qaFreq,
+								$qaFreq,
 								$row->qaTime,
 								$priority,
 								$row->jobid,
