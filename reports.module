@@ -326,19 +326,25 @@ function menufun_generate()
 					$output .='delivered the ';
 				}
 				else {
+					// no delivery
 					if ($data->comment=='Still working on it'){
 						$output .='been working on the ';		
 					}
 					else if ($data->comment=='Site Changed'){
-						$output .=' done the ';
+						$output .=' been working on the ';
+					}
+					else if ($data->type=='Development' ||
+						$data->type=='Enhancement'){
+						$output .=' been working on the ';
 					}
 					else{
 						$output .='checked the ';
 						$skip_type = true;
 					}
-					if ($data->comment=='Others'){
-						$data->comment = $data->others;
-					}
+				}
+
+				if ($data->comment=='Others'){
+					$data->comment = $data->others;
 				}
 				if (!$skip_type){
 					$output .= strtolower($data->type) . ' of ';
@@ -361,12 +367,13 @@ function menufun_generate()
 			if (isset($new)){
 				$output .= '<br/>We have finished most of the development/maintenance tasks. Please assign new tasks to boryi. Thanks. <br/>';
 			}
-			
 
 			$output .= '<br/>best wishes,<br/>';
 			$output .= '<br/>Yang';
 	    }
 	}
+
+	$output = str_replace('..', '.', $output);
     
     
     $result = '';
