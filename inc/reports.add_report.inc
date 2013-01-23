@@ -40,7 +40,7 @@
 		$result .= t('<div id="slider-range-min" style="width:260px;float:left;"></div><br/>Time cost: <input id="time" type="text" style="border:1; color:#f6931f; font-weight:bold;" />&nbsp;hour(s)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
 		$result .= t('Type: <select id="type"><option value="1">Maintenance</option><option value="2">Enhancement</option><option value="3">Support</option><option value="4">Development</option><option value="0">Routine QA</option></select>&nbsp;&nbsp;&nbsp;&nbsp;');
 		$result .= t('By: <select id="employee">' . $employee . '</select><br /><br /><br />');
-		$result .= t('<span id="sp_comment">Comment: <select id="comment">' . $comments . '</select><span id="sp_others"><br/><br/><textarea  id="others" name="others" cols="40" rows="5"></textarea></span><br /><br /><br />');
+		$result .= t('<span id="sp_comment">Comment: <select id="comment">' . $comments . '</select><span id="sp_others"><br/><br/><textarea  id="others" name="others" cols="40" rows="5"></textarea></span></span><br /><br /><br />');
 		$result .= t('&nbsp;&nbsp;<button id="add">Add</button>&nbsp;&nbsp;<br /><br />');
 		$result .= t('</p>');
 		$result .= t('<p><div id="reports-grid"></div></p>');

@@ -106,7 +106,29 @@ function scan(id, data){
 		function() { $(this).removeClass('grid-hover');});;
 }
 
-jQuery().ready(function(){ 
+jQuery().ready(function(){
+	// file uploader toolkit
+	$('#file_upload').uploadify({
+		'formData'     	: {
+			'timestamp' : '1358739522',
+			'token'     : 'c376e347a876096d1fee91a9e64b77ac',
+			'botid'		: 0,
+			'uname'		: $('#h_username').val(),
+		},
+		'swf'      		: 'uploadify.swf',
+		'uploader' 		: 'uploadify',
+		'fileSizeLimit'	: '1MB',
+		'fileTypeExts'  : '*.cs;*.regex;.sql;*.nlog;*.xml;*.bat;*.txt;',
+		'successTimeout': '10',
+		'removeTimeout': '2',
+		onUploadError : function(file, errorCode, errorMsg){
+			//alert(file + ' is not valid type - ' + errorMsg);
+		},
+		onUploadStart : function(file) {
+            //$("#file_upload").uploadify("settings", "botid", $('#h_bid').val());
+            $("#file_upload").uploadify("settings", "formData", {'botid':$('#h_bid').val()});
+        }
+	});
 	// Bots list
 	var botsView = jQuery("#botsList").jqGrid({
 		url:targetPath,
@@ -117,8 +139,8 @@ jQuery().ready(function(){
 				{name:'bts_id', index:'bts_id', width:10, editable: true, editrules:{number:true, required:true, maxValue:99999, custom:true, custom_func:check_id,}, search:false, searchoptions:{sopt:['eq'], searchOnEnter:true}}, 
 				{name:'botname', index:'botname', width:45, editable: true, editrules:{required:true, custom:true, custom_func:check_name,}, searchoptions:{sopt:['cn'], searchOnEnter:true}}, 
 				{name:'sector', index:'sector', width:40, editable: true,edittype:"select",
-						editoptions: { value: "1:E-Commerce;2:Retail - Softline ;3:Retail - Hardline ;4:Medical Devices;5:Telecommunications;6:Lodging;7:Auto Retail;8:Video Games;9:Real Estate;10:Store Locators;11:AirLines;12:R&D;13:Homebuilders;14:Mobile Phone;15:FExchange;16:Consumer Technology;20:Restaurant;19:KeywordSearches;22:Cable And Satellite"/*21:SocialNetworking;*/ },
-						search:false, },
+						editoptions: { value: "1:E\u2013Commerce;2:Retail \u2013 Softline ;3:Retail \u2013 Hardline ;4:Medical Devices;5:Telecommunications;6:Lodging;7:Auto Retail;8:Video Games;9:Real Estate;10:Store Locators;11:AirLines;12:R&D;13:Homebuilders;14:Mobile Phone;15:FExchange;16:Consumer Technology;20:Restaurant;19:KeywordSearches;22:Cable And Satellite;23:Christies"/*21:SocialNetworking;*/ },
+						search:true, searchoptions:{sopt:['cn'], searchOnEnter:true}},
 				{name:'qaAtBoryi', index:'qaAtBoryi', width:20, editable: true, edittype:"checkbox",editoptions: { value: "1:0", },search:false, defval:"1",}, 
 				{name:'qaFreq', index:'qaFreq', width:30, editable: true, edittype:"select",
 						editoptions: { value: "20:Daily;4:Weekly;8:Twice a Week;1:Monthly", 
@@ -151,16 +173,30 @@ jQuery().ready(function(){
 			}
 		},
 		beforeInitData:function(){
-/*			var cm = grid.jqGrid('getColProp', 'flag'),
+			/*
+			var cm = grid.jqGrid('getColProp', 'flag'),
 			selRowId = grid.jqGrid('getGridParam', 'selrow');
-			cm.editoptions.src = 'http://www.ok-soft-gmbh.com/img/flag_' + selRowId + '.gif';*/
+			cm.editoptions.src = 'http://www.ok-soft-gmbh.com/img/flag_' + selRowId + '.gif';
+			*/
 		},
 		loadComplete: function() {
 			$("tr.jqgrow", this).contextMenu('myMenu1', {
 				bindings: {
 					'contextupload': function(trigger) {
-						alert('You can upload maintenance for bot: ' + trigger.id + ' later');
-						//	alert();
+						//alert('You can upload maintenance for bot: ' + trigger.id + ' later');
+						//var data = $('#results-grid').jqGrid('getRowData');
+
+						//var data = $('#results-grid').jqGrid('getRowData', trigger.id);
+						$('#h_bid').val(trigger.id);
+
+						var botname = $('#botsList').jqGrid ('getCell', trigger.id, 'botname');
+
+						var uploadPanel = $('#upload_container').dialog({
+							width:'auto',
+//							resizable:true,
+							title: 'Delivery for :  ' + botname,
+						});
+
 						// trigger is the DOM element ("tr.jqgrow") which are triggered
 //						grid.editGridRow(trigger.id, {});
 					},/*

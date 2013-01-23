@@ -10,12 +10,17 @@
 		drupal_add_css($bots_path . '/files/jqGrid/themes/ui.jqgrid.css');
 		drupal_add_css($bots_path . '/css/bots.css');
 		drupal_add_css($bots_path . '/css/tree.css');
+		drupal_add_css($bots_path . '/css/uploadify.css');
 		jquery_ui_add(array('ui.core','ui.widget','ui.button','ui.mouse','ui.draggable','ui.position','ui.dialog','ui.tabs','ui.datepicker')); // For a single file 
 		drupal_add_js($bots_path . '/files/jqGrid/js/i18n/grid.locale-en.js');
 		drupal_add_js($bots_path . '/files/jqGrid/js/jquery.jqGrid.min.js');
 		drupal_add_js("var imgPath = '$bots_path/images/';", 'inline');
 		drupal_add_js($bots_path . '/js/grid-bots.js');
 		drupal_add_js($bots_path . '/js/jquery.contextmenu.js');
+		drupal_add_js($bots_path . '/js/jquery.uploadify.min.js');
+
+		global $user;
+
 /*
 		drupal_add_js($ztree_path . '/js/jquery.ztree.core-3.3.js');
 		drupal_add_js($ztree_path . '/js/jquery.ztree.excheck-3.3.js');
@@ -33,6 +38,14 @@
 							<span style="font-size:11px; font-family:Verdana">Upload</span>
 						</li>
 					</ul>
+				</div>
+				<div id="upload_container" style="display:none;">
+					<form>
+						<div id="queue"></div>
+						<input id="file_upload" name="file_upload" type="file" multiple="true">
+						<input type="hidden" id="h_bid" value=0 />
+						<input type="hidden" id="h_username" value="'.$user->name .'" />
+					</form>
 				</div>';
 	}
 	
@@ -104,6 +117,8 @@
 		$sql .= " ORDER BY $sidx $sord LIMIT $start, $limit";
 		
 		$result = db_query($sql);
+
+		//var_dump($sql);
 
 		// constructing a JSON
 		$responce->page = $page;
