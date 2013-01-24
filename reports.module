@@ -1,7 +1,8 @@
 <?php
 
-function reports_menu() {
+module_load_include('inc', 'reports', 'inc/reports.common');
 
+function reports_menu() {
     $items['show'] = array(
         'page callback' => 'showTodayReports',
         'access callback' => 'report_user_access',
@@ -79,7 +80,12 @@ function reports_menu() {
         'access callback' => true,
         'type' => MENU_CALLBACK,
     );
-	
+    $items['deploy'] = array(
+        'page callback' => 'menufun_deploy',
+        'access callback' => 'report_admin_access',
+        'type' => MENU_CALLBACK,
+    );   
+
 	/*
 	$items['admin/settings/report'] = array(
 		'title' => 'ITG Report Settings',
@@ -91,85 +97,20 @@ function reports_menu() {
 		'file' => 'reports.admin.inc',
 	);
 	*/
-
     return $items;
 }
 
-function report_user_access(){
-  global $user;
-  return in_array('itg_developer',$user->roles);
-}
-function report_admin_access(){
-  global $user;
-  return in_array('itg_admin',$user->roles);
+function menufun_deploy(){
+	module_load_include('inc', 'reports', 'inc/reports.deploy');
+	return deploy();
 }
 
 function menufun_upload(){
-	global $user;
-	$appendix = gmDate("Ymd");
-	$targetFolder = drupal_get_path('module', 'reports') . '/uploads/' . $appendix ;// // Relative to the root
-	$targetPath = $_SERVER['DOCUMENT_ROOT'] .'/drupal/'. $targetFolder;
-//	$verifyToken = md5('unique_salt' . $_POST['timestamp']);
-	$verifyToken = 'c376e347a876096d1fee91a9e64b77ac';
-//	$appendix = gmDate("Ymd\THis\Z");
-
-	$bid = $_REQUEST['botid']; // get the bot id
-	$uname = $_REQUEST['uname']; // get the username
-	if (is_numeric($bid) && $bid > 0){
-
-		if(!(file_exists($targetPath) && is_dir($targetPath))){
-			mkdir($targetPath);
-		}
-
-		$targetPath .= '/' . $uname;
-		if(!(file_exists($targetPath) && is_dir($targetPath))){
-			mkdir($targetPath);
-		}
-
-		$sql = "SELECT botname FROM `mj_bots` WHERE id = $bid";
-		$botname = db_result(db_query($sql));
-
-		$targetPath .= '/' . $botname;
-		if(!(file_exists($targetPath) && is_dir($targetPath))){
-			mkdir($targetPath);
-		}
-
-		if (!empty($_FILES) && $_POST['token'] == $verifyToken) {
-	//		header("Content-Type:text/html;charset=utf8");
-			$tempFile = $_FILES['Filedata']['tmp_name'];
-			$filename = iconv('utf-8','gb2312',$_FILES['Filedata']['name']);
-			
-			$targetFile = rtrim($targetPath,'/') . '/' . $filename;
-			
-			// Validate the file type *.cs;*.regex;.sql;*.nlog;*.xml;*.bat;*.bat;
-			$fileTypes = array('cs','regex','sql','nlog','xml','bat','txt'); // File extensions
-			$fileParts = pathinfo($_FILES['Filedata']['name']);
-			
-			if (in_array(strtolower($fileParts['extension']), $fileTypes)) {
-				move_uploaded_file($tempFile, $targetFile);
-				echo 'success';
-				// move the file to other place that can be uploaded
-			} else {
-				echo 'Invalid file type.';
-			}
-		}
-	}
+	module_load_include('inc', 'reports', 'inc/reports.upload');
 }
 
 function menufun_load_sectors(){
-	//$sectors = array();
-	$sql = "select sct_id as id, sector from mj_sectors";
-	$data = db_query($sql);
-	$i = 0;
-	while ($rec = db_fetch_object($data)){
-		$sectors->f[$i]['id']=$rec->id;
-		$sectors->f[$i]['sector']=$rec->sector;
-		$i++;
-	}
-	echo str_replace(
-			array('<', '>', '&'), 
-			array('\\u003c', '\\u003e', '\\u0026'), 
-			json_encode($sectors));
+	module_load_include('inc', 'reports', 'inc/reports.sectors');
 }
 
 function menufun_path_js(){
@@ -186,528 +127,49 @@ function menufun_path_js(){
 }
 
 function menufun_set_path(){
-	$sid = $_REQUEST['sid'];
-	$path = $_REQUEST['p'];
-	$op = $_REQUEST['op'];
-	if (!empty($op)&&!empty($sid)&& !empty($path)){
-		// handling ajax requests
-		$path = str_replace("\\", "\\\\", $path);
-		if ($op=='add'){
-			$sql = "INSERT IGNORE INTO mj_sectors_paths VALUES($sid, '$path')";
-		} else if ($op=='del'){
-			$sql = "DELETE FROM mj_sectors_paths WHERE sps_sct_id = $sid AND sps_path = '$path'";
-			//var_dump($sql);
-		}
-		db_query($sql);
-		exit(0);
-	}
-	
-	/// displaying page content
-    drupal_add_css(drupal_get_path('module', 'reports') .'/css/tree.css');
-    drupal_add_js(drupal_get_path('module', 'reports') .'/js/setpath.js');
-	return '<div><select id="sectors"></select></div><div id="paths"></div><div><button id="add" type="button">Add</button><input id="newpath" value="" size="60"/>';
+	module_load_include('inc', 'reports', 'inc/reports.setpath');
+	return set_path();
 }
 
-function displayfiles()
-{
-    $p_id = $_POST['id'];
-	
-	if (empty($p_id)){
-		$p_id = '0';
-	}
-	
-	$sql = "SELECT `id`, `isparent`, `fullname` FROM `mj_files` WHERE pid = '$p_id'";
-    $records = db_query($sql);
-	$output = '';
-	$output .= '[';
-    while ($data = db_fetch_object($records)) {
-		$output .= '{';
-		$output .= 'id:\'' . $data->id . '\',';
-		$output .= 'name:\'' . $data->fullname . '\',';
-		$output .= 'isParent:' . ($data->isparent == 0 ? 'false' : 'true');
-		$output .= '},';
-	}
-	if (strlen($output) > 1){
-		$output = substr($output, 0, strlen($output) - 1);
-	}
-	$output .= ']';
-	echo $output;
-}
-
-
-function showTodayReports()
-{
-    $date = $_POST['date'];
-    
-    if (isset($date) && !empty($date) && strlen($date) > 0)
-    {
-    $sql = "select rpt_id, issue, rdate, delivery, rpt_bts_id, botname, sector, type, time, employee, comment, others from mj_reports ";
-    $sql .= "LEFT OUTER JOIN mj_bots ON bts_id = rpt_bts_id LEFT OUTER JOIN mj_sectors ON sct_id = bts_sct_id ";
-    $sql .= " where rdate = '$date' order by employee desc, type";
-    
-    $result = ''; 
-    $records = db_query($sql);
-    echo '<table>';
-    //$space = str_repeat("&nbsp;", 4);
-    $space = '</td><td>';
-    $totaltime = 0;
-    while ($data = db_fetch_object($records)) {
-        echo '<tr><td>' . substr($data->rpt_bts_id, 0, 3) . $space . $data->botname .$space . $data->issue . $space . '<img src="' . drupal_get_path('module', 'reports') . '/image/drop-' . ($data->delivery == 1 ? 'yes' : 'no') .'.gif" />';
-        echo $space . $data->sector . $space . $data->type . $space . $data->time . $space . $data->employee. $space. $data->comment. $space;
-        echo '<img class="close-img" alt="' . $data->rpt_id . '" src="' . drupal_get_path('module', 'reports') . '/image/close.gif" /></td></tr>';
-        $totaltime += $data->time;
-    }
-    echo '</table><br /> ';
-    
-    if($totaltime > 0){echo 'Total time: ' . $totaltime;}
-    }
-}
-
-function menufun_remove()
-{
+function menufun_remove(){
 	module_load_include('inc', 'reports', 'inc/reports.del_report');
 }
 
-function menufun_add()
-{
+function menufun_add(){
 	module_load_include('inc', 'reports', 'inc/reports.add');
 }
 
-function menufun_add_report()
-{
-	drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/redmond/jquery.ui.all.css');
-    drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/default/ui.datepicker.css');
-    drupal_add_css(drupal_get_path('module', 'reports') .'/css/reports.css');
-    
-    jquery_ui_add(array('ui.datepicker', 'ui.widget', 'ui.button', 'ui.mouse', 'ui.slider'));
-    jquery_ui_add('ui.datepicker');  // For a single file
-    drupal_add_js(drupal_get_path('module', 'reports') .'/js/date.js');
-	
+function menufun_add_report(){
 	module_load_include('inc', 'reports', 'inc/reports.add_report');
-	
 	return add_report();
 }
 
-
-function menufun_view_report()
-{
-    drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/redmond/jquery.ui.all.css');
-    drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/default/ui.datepicker.css');
-	drupal_add_js(drupal_get_path('module', 'reports') .'/js/jquery.validate.js');
-    drupal_add_css(drupal_get_path('module', 'reports') .'/css/reports.css');
-    
-    jquery_ui_add(array('ui.datepicker', 'ui.widget', 'ui.button','ui.mouse', 'ui.slider'));
-    jquery_ui_add('ui.datepicker');  // For a single file
-    drupal_add_js(drupal_get_path('module', 'reports') .'/js/date.js');
-    
-    $date = $_POST['date'];
-    if (isset($date) && !empty($date) && strlen($date) > 0){
-        showTodayReports($date);
-        return;
-    }
-    
-    $result = '';
-    $result .= t('Report Date: <input id="datepicker" type="text" />');
-    $result .= t('&nbsp;&nbsp;<button id="view">View</button>&nbsp;&nbsp;<br /><br />');
-    $result .= t('</p>');
-    $result .= t('<p><div id="reports-grid"></div></p>');
-    return $result;
+function menufun_view_report(){
+	module_load_include('inc', 'reports', 'inc/reports.viewreports');
+	return view_reports();
 }
 
-
-function menufun_view_bots()
-{
-	drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/redmond/jquery.ui.all.css');
-	drupal_add_js(drupal_get_path('module', 'reports') .'/js/stripe.js');
-    drupal_add_css(drupal_get_path('module', 'reports') .'/css/reports.css');
-		
+function menufun_view_bots(){
 	module_load_include('inc', 'reports', 'inc/reports.view');
 	return view_report();
 }
 
-
-function menufun_generate()
-{
-	drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/redmond/jquery.ui.all.css');
-    drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/default/ui.datepicker.css');
-    drupal_add_css(drupal_get_path('module', 'reports') .'/css/reports.css');
-    
-    jquery_ui_add(array('ui.datepicker', 'ui.widget', 'ui.button'));
-    jquery_ui_add('ui.datepicker');  // For a single file
-    drupal_add_js(drupal_get_path('module', 'reports') .'/js/jquery.validate.js');
-    drupal_add_js(drupal_get_path('module', 'reports') .'/js/generate.js');
-
-	$output='';
-	$date = '';
-	$date1 = '';
-	$date2 = '';
-
-	$employee = array('Yang Song'=>'Yang', 'Wei Yin' => 'Wei', 'Weilong Chen' => 'Weilong', 'Yilong Xie'=> 'Yilong');
-
-
-    $type = $_POST['type'];
-
-	if ($type == 1){
-		// weekly report 
-		$date1 = $_POST['fromdate'];
-	    $date2 = $_POST['todate'];
-
-	    if ((isset($date1) && !empty($date1) && strlen($date1) > 0)
-			&& isset($date2) && !empty($date2) && strlen($date2) > 0){
-			module_load_include('inc', 'reports', 'inc/reports.generate');
-		    require_once 'files/Classes/PHPExcel.php';
-	        return  save_excel($date1, $date2);
-	    }
-	}
-	else{
-		$new = $_POST['new'];	// if asks for new tasks
-		$svn = $_POST['svn'];	// if SVN failed to commit
-	    $date = $_POST['date'];
-	    if (isset($date) && !empty($date) && strlen($date) > 0){
-	    	$sql = "SELECT issue, delivery, type, employee, comment, botname, others FROM `mj_reports` left outer join `mj_bots` on bts_id = rpt_bts_id WHERE `rdate` = '$date' and type<> 'Routine QA'
-				order by employee, delivery desc";
-
-	    	$output = 'Daily repot of ' . $date . ':<br /><br />';
-
-	    	$output .= 'Hi Ian and Jesse,<br/><br/>';
-	    	$output .= 'Here is a summary of today\'s work:<br/><br/>';
-
-			$result = db_query($sql); 
-			$index = 1;
-			while($data = db_fetch_object($result))
-			{
-				$output .= $index++ . ') ';
-				$output .= $employee["$data->employee"] . ' ';
-				$output .= ' has ';
-				
-				$skip_type = false;
-				if($data->delivery == 1 ){
-					$output .='delivered the ';
-				}
-				else {
-					// no delivery
-					if ($data->comment=='Still working on it'){
-						$output .='been working on the ';		
-					}
-					else if ($data->comment=='Site Changed'){
-						$output .=' been working on the ';
-					}
-					else if ($data->type=='Development' ||
-						$data->type=='Enhancement'){
-						$output .=' been working on the ';
-					}
-					else{
-						$output .='checked the ';
-						$skip_type = true;
-					}
-				}
-
-				if ($data->comment=='Others'){
-					$data->comment = $data->others;
-				}
-				if (!$skip_type){
-					$output .= strtolower($data->type) . ' of ';
-				}
-				$output .= '<b>' . $data->botname . '</b> bot';
-
-				if (!empty($data->issue)){
-					$output .= '(issue ' . $data->issue . ')';
-				}
-				$output .= '.';
-				if (!empty($data->comment)){
-					$output .= ' ' . $data->comment . '.';
-				}
-				$output .= $data->delivery == 1 ? ' Please deploy.':'';
-				$output .= '<br />';
-			}
-			if (isset($svn)){
-				$output .= '<br/>The SVN server just runs out of disk space again and we failed to commit todays scripts. Please check.<br/>';
-			}
-			if (isset($new)){
-				$output .= '<br/>We have finished most of the development/maintenance tasks. Please assign new tasks to boryi. Thanks. <br/>';
-			}
-
-			$output .= '<br/>best wishes,<br/>';
-			$output .= '<br/>Yang';
-	    }
-	}
-
-	$output = str_replace('..', '.', $output);
-    
-    
-    $result = '';
-    // weekly report from
-    $result .= t('Weekly Report:');
-    $result .= t('<form id="datesform" name="datesform" action="#" method="post" />');
-    $result .= t('From Date: <input id="fromdate" name="fromdate" type="text" />');
-    $result .= t('To Date: <input id="todate" name="todate" type="text" />');
-    $result .= t('&nbsp;&nbsp;<button id="generate" type="submit">GetWeeklyReport</button>&nbsp;&nbsp;<br /><br />');
-    $result .= t('<input id="type" name="type" type="hidden" value="1" />');
-    $result .= t('</form>');
-	// daily report from
-	$result .= t('Daily Report:');
-	$result .= t('<form id="dateform" name="dateform" action="#" method="post" />');
-	$result .= t('Date: <input id="date" name="date" type="text" value="' . $date . '" />');
-	$result .= t('&nbsp;&nbsp;<button id="getdailyreport" type="submit">GetDailyReport</button>&nbsp;&nbsp;<br /><br />');
-	$result .= t('<input id="type" name="type" type="hidden" value="0" />');
-	$result .= t('Ask for New Tasks? <input type="checkbox" id="new" name="new"/>');
-	$result .= t('SVN failed? <input type="checkbox" id="svn" name="svn" />');
-    $result .= t('</form>');
-	$result .= t('<br /><br />');
-    $result .= t($output);
-    return $result;
+function menufun_generate(){
+	module_load_include('inc', 'reports', 'inc/reports.reports');
+	return get_reports();
 }
 
-function menufun_handler()
-{
+function menufun_handler(){
 	module_load_include('inc', 'reports', 'inc/reports.view');
 	echo get_data();
 	exit();
 }
 
-function menufun_scan()
-{
-	$op = $_REQUEST['op'];
-	$bid = $_REQUEST['bid'];
-	// validation here
-	
-	if ($op == 'scan')
-	{
-		scan_files($bid);
-	}/*
-	else if ($op == 'upload')
-	{
-		// get the upload package
-		// unzip
-		// overwrite
-	}*/
-	else if ($op == 'download')
-	{
-		$checked = split(';', $_REQUEST['checked']);
-		
-		zip_files($bid, $checked);
-	}
-	else if ($op == 'confirm')
-	{
-		$checked = $_REQUEST['checked'];
-		$unchecked = $_REQUEST['unchecked'];
-		
-		$checked = split(';', $checked);
-		$unchecked = split(';', $unchecked);
-		
-		check_files($bid, $checked, 1);
-		check_files($bid, $unchecked, 0);
-		
-		// get script list
-		// update to database
-		//list_bot_related_files($bid);
-		echo 'true';
-	}
+function menufun_scan(){
+	module_load_include('inc', 'reports', 'inc/reports.scan');
 }
 
-function scan_files($bid){
-	
-	$sql = "SELECT version, keywords FROM `mj_bots` WHERE id = $bid";
-	
-	$bdata = db_fetch_object(db_query($sql));
-	$version = $bdata->version;
-	$keywords = $bdata->keywords;
-	$scan_path = array();
-
-	if ($version == 'R20')
-	{
-		$sql = "SELECT sps_path FROM mj_sectors_paths LEFT OUTER JOIN mj_bots ON bts_sct_id = sps_sct_id WHERE id = $bid";
-		$result = db_query($sql); 
-		while($data = db_fetch_object($result))
-		{
-			$scan_path[] = $data->sps_path;
-		}
-	}
-	else
-	{
-		$scan_path[] = "C:\Repository\QAG\Bot\Releases\\$version";
-	}
-	
-	module_load_include('inc', 'reports', 'inc/reports.list');
-	
-	$scripts = array();
-
-	if (empty($keywords)){
-//		die('Keywords can\'t be null');
-		die('false');
-	}
-	
-	foreach($scan_path as $key => $val){
-		if (strpos($val, '\Config') !== false)
-		{
-			// attach the config files
-			$sql = "SELECT scf_sct_config AS config FROM `mj_bots` LEFT OUTER JOIN mj_sectors_configs ON scf_sct_id = bts_sct_id WHERE id = $bid";
-			$result = db_query($sql); 
-			while($data = db_fetch_object($result))
-			{
-				$scripts[] = $val . '\\' . $data->config;
-			}
-		}
-		scan_path($val, $keywords, 0, &$scripts);
-	}
-
-	$unixtime = time();
-	if (!empty($scripts)){
-		foreach($scripts as $key => $val)
-		{
-			if(!is_array($val)){
-				$val = str_replace("\\", "\\\\", $val);
-				// update files
-				$sql = "INSERT INTO mj_bots_files VALUES ($bid, '$val', NULL, $unixtime) ON DUPLICATE KEY UPDATE lastfound = $unixtime";
-				db_query($sql);
-			}
-		}
-	} else {
-		// remove the files that gone
-		$sql = "DELETE FROM mj_bots_files WHERE bid = $bid ";
-		if ($unixtime > 0){
-			$sql .= " AND lastfound < $unixtime ";	
-		}
-		db_query($sql);
-	}
-	
-	list_bot_related_files($bid);
-}
-
-function zip_files($bid, $files){
-	if (empty($files)){
-		die('false');
-	}
-	
-	$zip = new ZipArchive;
-	$appendix = gmDate("Ymd\THis\Z");
-	$path = drupal_get_path('module', 'reports') . '/temp/';
-	$file =  $path . $bid . '-' . $appendix . '.zip';
-	if (!file_exists($file)){
-		if($zip->open($file, ZipArchive::CREATE)!==TRUE)
-		{
-			// Opening zip file to load files
-			die("* Sorry ZIP creation failed");
-		}
-		else {
-			foreach($files as $key => $val){
-				if (!empty($val)){
-					$zip->addFile($val);
-				}
-			}
-		}
-		$zip->close();
-	}
-	echo $file;
-/*
-	header('Content-Type: application/zip');
-	header('Content-Length: ' . filesize($file));
-	header('Content-Disposition: attachment; filename="file.zip"');
-	readfile($file);
-	//unlink($file); 
-*/
-}
-
-function check_files($bid, $files, $checked){
-	foreach($files as $key => $val){
-		if (!empty($val)){
-			$val = str_replace("\\", "\\\\", $val);
-			$sql = "UPDATE mj_bots_files SET checked = $checked WHERE bid = $bid AND file = '$val'";
-			db_query($sql);
-		}
-	}
-}
-
-function list_bot_related_files($bid){
-	// get the timestamp when files were scaned last time
-	$sql = "SELECT IFNULL(MAX(lastfound), 0) FROM mj_bots_files WHERE bid = $bid";
-	$unixtime = db_result(db_query($sql));
-	
-	// remove the files that gone
-	$sql = "DELETE FROM mj_bots_files WHERE bid = $bid ";
-	if ($unixtime > 0){
-		$sql .= " AND lastfound < $unixtime ";	
-	}
-	db_query($sql);
-	
-	// list the latest found items only
-	$sql = "SELECT file, checked FROM mj_bots_files WHERE bid = $bid ";
-	if ($unixtime > 0){
-		$sql .= " AND lastfound = $unixtime ";	
-	}
-	$sql .= "ORDER BY checked DESC, file";
-	$result = db_query($sql);
-	
-
-	$i = 0;
-	while ($row = db_fetch_array($result))
-	{
-		$responce->f[$i]['checked']=$row[checked];
-		$responce->f[$i]['file']=$row[file] . ';' ;
-		$i++;
-	}
-	echo json_encode($responce);
-}
-
-
-function menufun_managebots()
-{
-	$op = $_POST['oper'];
-	if (!empty($op))
-	{
-		$id = $_POST['id'];
-		$priority = $_POST['priority'];
-		$botname = $_POST['botname'];
-		$botid = $_POST['bts_id'];
-		$jobid = $_POST['jobid'];
-		$qaAtBoryi = $_POST['qaAtBoryi'];
-		$qaTime = $_POST['qaTime'];
-		$qaFreq = $_POST['qaFreq'];
-		if (empty($_POST['qaTime']))
-		{
-			$qaTime = 'NULL';
-		}
-		if (empty($_POST['jobid']))
-		{
-			$jobid = 'NULL';
-		}
-		$sector = $_POST['sector'];
-		$version = $_POST['version'];
-		$keywords = $_POST['keywords'];
-		$keywords = str_replace("\\", "\\\\", $keywords);
-		
-		if ($op == 'add') 
-		{/*
-			global $user;
-			var_dump($user);*/
-			watchdog('add', serialize($_POST));
-
-			/*  validation here*/
-			$sql = "INSERT INTO mj_bots
-				(`bts_id`, `botname`, `bts_sct_id`, `qaAtBoryi`, `qaTime`, `qaTimes`, `priority`, `jobid`, `keywords`, `version`)
-				VALUES($botid, '$botname', $sector, $qaAtBoryi, $qaTime, $qaFreq, $priority, '$jobid', '$keywords', '$version')";
-				
-			$records = db_query($sql);
-		}
-		else if ($op == 'edit') 
-		{
-			watchdog('edit', serialize($_POST));
-
-			/*  validation here*/
-			$sql = "UPDATE mj_bots 
-					SET bts_id = $botid, botname = '$botname', bts_sct_id = $sector, qaAtBoryi = $qaAtBoryi, 
-						qaTime = $qaTime, qaTimes = $qaFreq, priority = $priority, jobid = '$jobid', keywords = '$keywords', version = '$version'
-					WHERE id = $id";
-			$records = db_query($sql);
-		}
-	}
-	else
-	{
-		drupal_add_css(drupal_get_path('module', 'jquery_ui') .'/jquery.ui/themes/redmond/jquery.ui.all.css');
-		drupal_add_js(drupal_get_path('module', 'reports') .'/js/stripe.js');
-		drupal_add_css(drupal_get_path('module', 'reports') .'/css/reports.css');
-			
-		module_load_include('inc', 'reports', 'inc/reports.view');
-		return view_report();
-	}
+function menufun_managebots(){
+	module_load_include('inc', 'reports', 'inc/reports.bots');
+	return manage_bots();
 }

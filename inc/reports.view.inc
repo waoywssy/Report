@@ -1,26 +1,29 @@
 <?php
+	$bots_path = drupal_get_path('module', 'reports');
+	$jquery_ui_path = drupal_get_path('module', 'jquery_ui');
+
+	drupal_add_css($jquery_ui_path .'/jquery.ui/themes/redmond/jquery.ui.all.css');
+	drupal_add_js($bots_path .'/js/stripe.js');
+    drupal_add_css($bots_path .'/css/reports.css');
+
+    drupal_add_css($jquery_ui_path . '/jquery.ui/themes/redmond/jquery.ui.all.css');
+	drupal_add_css($jquery_ui_path . '/jquery.ui/themes/default/ui.datepicker.css');
+	drupal_add_css($bots_path . '/files/jqGrid/themes/ui.jqgrid.css');
+	drupal_add_css($bots_path . '/css/bots.css');
+	drupal_add_css($bots_path . '/css/tree.css');
+	drupal_add_css($bots_path . '/css/uploadify.css');
+	jquery_ui_add(array('ui.core','ui.widget','ui.button','ui.mouse','ui.draggable','ui.position','ui.dialog','ui.tabs','ui.datepicker')); // For a single file 
+	drupal_add_js($bots_path . '/files/jqGrid/js/i18n/grid.locale-en.js');
+	drupal_add_js($bots_path . '/files/jqGrid/js/jquery.jqGrid.min.js');
+	drupal_add_js("var imgPath = '$bots_path/images/';", 'inline');
+	drupal_add_js($bots_path . '/js/grid-bots.js');
+	drupal_add_js($bots_path . '/js/jquery.contextmenu.js');
+	drupal_add_js($bots_path . '/js/jquery.uploadify.min.js');
+	
 	function view_report()
 	{
-		$jquery_ui_path = drupal_get_path('module', 'jquery_ui');
-		$bots_path = drupal_get_path('module', 'reports');
 		//$ztree_path = str_replace("reports", "ztree", $bots_path);
-	
-		drupal_add_css($jquery_ui_path . '/jquery.ui/themes/redmond/jquery.ui.all.css');
-		drupal_add_css($jquery_ui_path . '/jquery.ui/themes/default/ui.datepicker.css');
-		drupal_add_css($bots_path . '/files/jqGrid/themes/ui.jqgrid.css');
-		drupal_add_css($bots_path . '/css/bots.css');
-		drupal_add_css($bots_path . '/css/tree.css');
-		drupal_add_css($bots_path . '/css/uploadify.css');
-		jquery_ui_add(array('ui.core','ui.widget','ui.button','ui.mouse','ui.draggable','ui.position','ui.dialog','ui.tabs','ui.datepicker')); // For a single file 
-		drupal_add_js($bots_path . '/files/jqGrid/js/i18n/grid.locale-en.js');
-		drupal_add_js($bots_path . '/files/jqGrid/js/jquery.jqGrid.min.js');
-		drupal_add_js("var imgPath = '$bots_path/images/';", 'inline');
-		drupal_add_js($bots_path . '/js/grid-bots.js');
-		drupal_add_js($bots_path . '/js/jquery.contextmenu.js');
-		drupal_add_js($bots_path . '/js/jquery.uploadify.min.js');
-
 		global $user;
-
 /*
 		drupal_add_js($ztree_path . '/js/jquery.ztree.core-3.3.js');
 		drupal_add_js($ztree_path . '/js/jquery.ztree.excheck-3.3.js');
