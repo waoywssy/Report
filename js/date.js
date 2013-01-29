@@ -80,6 +80,12 @@ $(function() {
         	other = '';
         }
 
+        if (bot == -999)
+        {
+			alert('Please choose a bot first!');
+			return;
+        }
+
 		if (issue.length > 0 && !issue.match(/([0-9,])+/))
 		{
 			alert('Wrong issue type, format: "1234" or "2345, 3456..."');
@@ -109,11 +115,13 @@ $(function() {
              //alert(msg);
              $("#reports-grid").html(msg);
              deletereport();
+
+             $("#delivery").attr("checked", "");
+             $("#issueid").val("");
            }
          });
 		 
 		$("#employee>option:selected").val() = employee;
-       
     });
     $("button#view").click(function(){
         var date = $("#datepicker").val();

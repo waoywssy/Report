@@ -118,7 +118,7 @@ jQuery().ready(function(){
 		'swf'      		: 'uploadify.swf',
 		'uploader' 		: 'uploadify',
 		'fileSizeLimit'	: '1MB',
-		'fileTypeExts'  : '*.cs;*.regex;.sql;*.nlog;*.xml;*.bat;*.txt;',
+		'fileTypeExts'  : '*.cs;*.regex;*.sql;*.nlog;*.xml;*.bat;*.txt;',
 		'successTimeout': '10',
 		'removeTimeout': '2',
 		onUploadError : function(file, errorCode, errorMsg){
@@ -161,8 +161,10 @@ jQuery().ready(function(){
 						search:false, 
 				},
 				],
+		checkOnUpdate:true,
 		rowNum:10,
 		autowidth:true,
+		reloadAfterSubmit:true, // this is important, or will cause bugs when new bot was added
 		rowList:[10,30,60],
 		pager:$('#botsPager'),
 		gridComplete: function(){
@@ -171,6 +173,10 @@ jQuery().ready(function(){
 				$("#botid").attr("value", ids[0]);
 				$('#botsList').jqGrid('setSelection',ids[0]);
 			}
+		},
+		afterSubmit : function(response, postdata) 
+		{
+			return [true, null,response.responseText]; 
 		},
 		beforeInitData:function(){
 			/*
@@ -322,10 +328,13 @@ jQuery().ready(function(){
 		$("#botsList").jqGrid('editGridRow',"new",{
 			height:'auto', 
 			width:'200xp',
-			reloadAfterSubmit:false,
+			reloadAfterSubmit:true,
 			recreateForm:true, 
 			closeAfterAdd:true,
 		});
+		$("#botsList").setGridParam({ datatype: 'json' }); // This is the line that undoes the loadonce = true
+		
+		$('#botsList').trigger('reloadGrid');
 	});
 	
 	// the edit button events

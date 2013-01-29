@@ -9,7 +9,7 @@
     
 	function add_report()
 	{
-		$bots = '';	
+		$bots = '<option value=-999>-</option>';	
 		$sql = 'select bts_id, botname from mj_bots order by botname';
 		$result = db_query($sql);
 		while ($data = db_fetch_object($result))

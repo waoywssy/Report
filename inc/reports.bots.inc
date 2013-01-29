@@ -36,6 +36,7 @@ function manage_bots(){
 				VALUES($botid, '$botname', $sector, $qaAtBoryi, $qaTime, $qaFreq, $priority, '$jobid', '$keywords', '$version')";
 				
 			$records = db_query($sql);
+			//echo mysql_insert_id();
 		}
 		else if ($op == 'edit') 
 		{
@@ -48,6 +49,7 @@ function manage_bots(){
 					WHERE id = $id";
 			//$records = 
 					db_query($sql);
+					//var_dump($sql);
 		}
 	}
 	else
