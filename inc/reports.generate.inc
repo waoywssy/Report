@@ -281,6 +281,7 @@ function save_excel($date1, $date2)
 	$objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(30);
 	$objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(20);
     $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setWidth(15);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setWidth(12);
 
 	// Set active sheet name and file name, generate the file
     $objPHPExcel->getActiveSheet()->setTitle('Reports');

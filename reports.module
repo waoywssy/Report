@@ -82,9 +82,14 @@ function reports_menu() {
     );
     $items['deploy'] = array(
         'page callback' => 'menufun_deploy',
-        'access callback' => 'report_admin_access',
+        'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
     );   
+    $items['new'] = array(
+        'page callback' => 'menufun_get_new_bot',
+        'access callback' => 'report_admin_access',
+        'type' => MENU_CALLBACK,
+    );
 
 	/*
 	$items['admin/settings/report'] = array(
@@ -172,4 +177,9 @@ function menufun_scan(){
 function menufun_managebots(){
 	module_load_include('inc', 'reports', 'inc/reports.bots');
 	return manage_bots();
+}
+
+function menufun_get_new_bot(){
+    module_load_include('inc', 'reports', 'inc/reports.new');
+    return set_codesmith_csp_for_bot();
 }

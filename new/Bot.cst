@@ -1,0 +1,430 @@
+﻿<%-- 
+Name: Bot Template
+Author: Yang Song
+Description: Create a class of bot
+--%>
+<%@ CodeTemplate Language="C#" TargetLanguage="C#" Debug="False" Description="Create a list of properties from database table." %>
+<%@ Property Name="Sector" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The sector of the bot." %>
+<%@ Property Name="BotName" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The name of the bot." %>
+<%@ Property Name="JobId" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The id of the job." %>
+<%@ Property Name="UseJson" Type="System.Boolean" Default="False" Optional="True" Category="EntityParams" Description="If the bot handling json data." %>
+<%@ Property Name="SourceDatabase" Type="SchemaExplorer.DatabaseSchema" Optional="False" Category="Database" Description="Database the tables will come from." %>
+<%@ Property Name="Regexes" Type="StringCollection" Default="" Optional="True" Category="Bot" Description="The id of the job." %>
+<%@ Map Name="CSharpAlias" Src="System-CSharpAlias" Description="System to C# Type Map" %>
+<%@ Assembly Name="SchemaExplorer" %>
+<%@ Assembly Name="CodeSmith.CustomProperties" %>
+<%@ Import Namespace="SchemaExplorer" %>
+<%@ Import Namespace="System.Collections" %>
+<%@ Import Namespace="CodeSmith.CustomProperties" %>
+<script runat="template">
+private string RegexNameFilter(string regexFullName)
+{
+    return regexFullName.Replace("_", "").Replace(".regex", "").Replace(".Regex", "").Replace(Sector, "").Replace(BotName, "");
+}
+private string RegexNameFilterToUpper(string regexFullName)
+{
+    string result = regexFullName.Replace("_", "").Replace(".regex", "").Replace(".Regex", "").Replace(Sector, "").Replace(BotName, "");
+    result = StringUtil.ToSpacedWords(result);
+    return result.Replace(" ", "_").ToUpper();
+}
+</script>
+using System;
+using System.IO;
+using System.Collections;
+using System.Collections.Specialized;
+using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml;
+using System.Net;
+using System.Web;
+using System.Diagnostics;
+using System.Threading;
+
+using Majestic.Bot.Core;
+using Majestic.Bot.Core.Server;
+using Majestic.Util;
+using Majestic.Entity.Shared;
+using Majestic.Entity.<%= Sector %>.<%= BotName %>;
+using Majestic.Dal.Shared;
+using Majestic.Dal.<%= Sector %>;
+
+<% if (UseJson){%>
+using LitJson;
+<% } %>
+namespace Majestic.Bot.Job.<%= Sector %>
+{
+    /// <remarks>
+    /// <%= BotName %> bot jobid:<%= JobId %>
+    /// </remarks>
+    
+    <% 
+        if (Sector.Equals("RetailListing")) 
+        {
+    %>
+    class <%= BotName %> : RetailBase
+    <%
+        }
+        else
+        {
+    %>
+    class <%= BotName %> : <%= Sector %>Base
+    <%
+        }
+    %>
+    {
+        #region Field 
+<%
+    foreach (string regexName in Regexes)
+    {
+        if (regexName != null && regexName.Length > 0)
+        {
+        %>
+        private Regex r<%=regexName.Replace(Sector + "_", "").Replace(BotName + "_", "").Replace("_", "").Replace(".Regex", "").Replace(".regex", "")%>;
+    <%  }
+    }
+%>
+
+<%
+    foreach(TableSchema table in SourceDatabase.Tables)
+    {
+        if (!table.Name.Contains("Event_") 
+            && table.Name.Contains(Sector + "_" + BotName)
+            && !table.Name.Contains("_Static"))
+        {
+            string name = table.Name;
+            string tableEntry = name.Replace(Sector + "_", "").Replace(BotName + "_", "").Replace("_", "");
+%>
+        private static string spSave<%= tableEntry%>;
+<%      }
+    }%>
+        
+        private static string proxy;
+        private static string userAgent;
+
+        private static string baseUrl = "http://www.domain.com";
+
+        private int maxRetries;
+
+        private int pageCrawled = 0;
+        private int sleepTime; // in seconds
+        private int maxHourlyPageView; // for proxy bandwidth
+        private int regexTimeout;
+        private WebManager webManager = null;
+
+        private long runId;
+        private DateTime runDate;
+        private DateTime requestStartTime;
+        private string domain;
+        
+        #endregion Field
+
+
+        #region Constructors 
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public <%= BotName %>()
+            : base()
+        {
+
+        }
+
+        #endregion Constructors
+
+
+        #region Methods
+
+        #region Override 
+
+        #region Init(...)
+
+        /// <summary>
+        /// This method needs to be defined here is primarily because we want to use the top level
+        /// class name as the logger name. So even if the base class can log using the logger defined by
+        /// the derived class, not by the base class itself
+        /// </summary>
+        /// <param name="row"></param>
+        public override void Init(Majestic.Dal.Shared.DSMaj.Maj_vwJobDetailsRow row)
+        {
+            StackFrame frame = new StackFrame(0, false);
+
+            base.Init(frame.GetMethod().DeclaringType.FullName, row);
+        }
+
+        #endregion Init(...)
+
+
+        #region Initialize()
+
+        /// <summary>
+        /// Initializes the fields
+        /// </summary>
+        private void Initialize()
+        {
+            runDate = this.m_dtStart;
+            runId = this.m_iRunID;
+
+            XmlDocument configDoc = new XmlDocument();
+
+            try
+            {
+                configDoc.Load(_sConfigFileRoot + _sConfigFileName);
+                XmlNode <%= BotName %> = configDoc.SelectSingleNode("//config/sites/<%= BotName %>");
+                XmlNode executionProperties = configDoc.SelectSingleNode("//config/executionProperties");
+
+                proxy = XmlConfigReader.GetString(<%= BotName %>, "proxy", "none");
+                userAgent = XmlConfigReader.GetString(executionProperties, "userAgent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)");
+                regexTimeout = XmlConfigReader.GetInt(executionProperties, "regexTimeout", 30);
+                
+                InitWebManager();
+                InitRegex();
+
+<%
+    foreach(TableSchema table in SourceDatabase.Tables)
+    {
+        if (!table.Name.Contains("Event_") 
+            && table.Name.Contains(Sector + "_" + BotName)
+            && !table.Name.Contains("_Static"))
+        {
+            string name = table.Name;
+            string tableEntry = name.Replace(Sector + "_", "").Replace(BotName + "_", "").Replace("_", "");
+%>
+                spSave<%= tableEntry%> = XmlConfigReader.GetString(<%= BotName %>, "spSave<%= tableEntry%>", "<%= Sector %>_SP_<%= BotName %>_Save<%= tableEntry%>");
+<%      }
+    }%>
+                
+                maxRetries = XmlConfigReader.GetInt(<%= BotName %>, "maxRetryTime", 3);
+                maxHourlyPageView = XmlConfigReader.GetInt(<%= BotName %>, "maxHourlyPageView", 4500);
+                sleepTime = XmlConfigReader.GetInt(<%= BotName %>, "sleepTime", 1);
+
+                requestStartTime = DateTime.Now;
+            }
+            catch (Exception ex)
+            {
+                throw new MajException("Error intializing job " + m_sConfig, ex);
+            }
+        }
+        
+        private void InitWebManager()
+        {
+            webManager = new WebManager();
+
+            if (String.IsNullOrEmpty(proxy) || proxy.Equals("none"))
+            {
+                throw new Exception("proxy was not set! job ended!");
+            }
+            webManager.Proxy = new WebProxy(proxy);
+
+            if (!string.IsNullOrEmpty(userAgent))
+            {
+                webManager.UserAgent = userAgent;
+            }
+
+        }
+
+        private void InitRegex()
+        {
+<%
+    foreach (string regexName in Regexes)
+    {
+        if (regexName != null && regexName.Length > 0)
+        {
+        %>
+            r<%= regexName.Replace(Sector + "_", "").Replace(BotName + "_", "").Replace("_", "").Replace(".Regex", "").Replace(".regex", "")%> = ComUtil.GetRegex("<%=regexName%>");
+    <%  }
+    }
+%>
+        }
+
+        #endregion Initialize()
+
+
+        #region OnRun()
+
+        /// <summary>
+        /// The assembly entry point that controls the internal program flow. 
+        /// It is called by the Run() function in the base class 
+        /// <see cref="MajesticReader.Lib.JobBase"/>
+        /// The program flow:
+        /// 1. Get the job requests <see cref="MajesticReader.Lib.HitBoxJobRequest /> based on JobId
+        /// 2. For each request, get the input parameters
+        /// 3. Retrieve the Html content
+        /// 4. identify and collect data based on the configration settings for the request
+        /// 5. Save collected data
+        /// </summary>
+        protected override void OnRun()
+        {
+            try
+            {
+                Initialize();
+
+                int jobId = base.JobId;
+                Log.RunId = base.RunId;
+
+                //get current job name
+                string jobName = base.GetJobName();
+
+                //Log start time
+                Log.Info("<%= BotName %> Started", string.Format(
+                    "Job {0} - {1} Started at {2}", jobId, jobName, DateTime.Now));
+
+                // The main method to collect all the data from the site
+                <%= BotName %>Run();
+
+                //Log end time
+                Log.Info("<%= BotName %> Finished", string.Format(
+                    "Job {0} - {1} Finished at {2}. {3} pages were crawled", 
+                    jobId, jobName, DateTime.Now, pageCrawled));
+
+            }
+            catch (Exception ex)
+            {
+                // This should have never happened. So it is "Unexpeced"
+                Log.Error("Unexpected/Unhandled Error", ex);
+                throw new Exception("Unexpected/Unhandled Error", ex);
+            }
+        }
+
+        #endregion OnRun()
+        
+        #endregion Override       
+        
+        
+        #region Sub-Methods 
+
+        #region <%= BotName %>Run()
+
+        /// <summary>
+        /// The main method to collect all the data from the site
+        /// </summary>
+        private void <%= BotName %>Run()
+        {
+            // add your code here 
+        }
+
+        #endregion <%= BotName %>Run()
+
+        #endregion Sub-Methods
+
+
+        #region Utilities 
+        
+        #region DownloadPage(...)
+
+        /// <summary>
+        /// Downloads pages by taking sleeping time into consideration
+        /// </summary>
+        /// <param name="url">The url that the page is going to be downloaded from</param>
+        /// <returns>The downloaded page from the specified url</returns>
+        private string GetCookieDownloadPage(string url)
+        {
+            string result = "";
+            DateTime requestStartTime1 = DateTime.Now;
+
+            Random random = new Random();
+
+            int randomSleepMilSeconds = random.Next(2000 * sleepTime);
+            int bandwidthSleepMilSeconds = (int)(3600000 / maxHourlyPageView)
+                - (int)((TimeSpan)requestStartTime1.Subtract(requestStartTime)).TotalMilliseconds;
+            Thread.Sleep(Math.Max(randomSleepMilSeconds, bandwidthSleepMilSeconds));
+
+            requestStartTime = DateTime.Now;
+
+            result = webManager.HttpGetWithManualCookieHandling(url, domain, true);
+
+            pageCrawled++;
+
+            return result;
+        }
+
+
+        /// <summary>
+        /// Downloads pages by taking sleeping time into consideration
+        /// </summary>
+        /// <param name="url">The url that the page is going to be downloaded from</param>
+        /// <param name="postData">The data to post</param>
+        /// <returns>The downloaded page from the specified url</returns>
+        private string GetCookieDownloadPage(string url, string postData)
+        {
+            string result = "";
+            DateTime requestStartTime1 = DateTime.Now;
+
+            Random random = new Random();
+
+            int randomSleepMilSeconds = random.Next(2000 * sleepTime);
+            int bandwidthSleepMilSeconds = (int)(3600000 / maxHourlyPageView)
+                - (int)((TimeSpan)requestStartTime1.Subtract(requestStartTime)).TotalMilliseconds;
+            Thread.Sleep(Math.Max(randomSleepMilSeconds, bandwidthSleepMilSeconds));
+
+            requestStartTime = DateTime.Now;
+
+            result = webManager.HttpPostWithManualCookieHandling(url, postData, domain, true);
+
+            pageCrawled++;
+
+            return result;
+        }
+
+
+        /// <summary>
+        /// Downloads pages by taking sleeping time into consideration
+        /// </summary>
+        /// <param name="url">The url that the page is going to be downloaded from</param>
+        /// <returns>The downloaded page from the specified url</returns>
+        private string DownloadPage(string url)
+        {
+            string result = "";
+            DateTime requestStartTime1 = DateTime.Now;
+
+            Random random = new Random();
+
+            int randomSleepMilSeconds = random.Next(2000 * sleepTime);
+            int bandwidthSleepMilSeconds = (int)(3600000 / maxHourlyPageView)
+                - (int)((TimeSpan)requestStartTime1.Subtract(requestStartTime)).TotalMilliseconds;
+            Thread.Sleep(Math.Max(randomSleepMilSeconds, bandwidthSleepMilSeconds));
+
+            requestStartTime = DateTime.Now;
+            result = webManager.HttpGet(url);
+            pageCrawled++;
+
+            return result;
+        }
+
+
+        /// <summary>
+        /// Downloads pages by posting data to remote server, 
+        /// taking sleeping time into consideration
+        /// </summary>
+        /// <param name="url">The url that the page is going to be downloaded from</param>
+        /// <param name="postData">The downloaded page from the specified url</param>
+        /// <returns>The downloaded page from the specified url</returns>
+        private string DownloadPage(string url, string postData)
+        {
+            string result = "";
+            DateTime requestStartTime1 = DateTime.Now;
+
+            Random random = new Random();
+
+            int randomSleepMilSeconds = random.Next(2000 * sleepTime);
+            int bandwidthSleepMilSeconds = (int)(3600000 / maxHourlyPageView)
+                - (int)((TimeSpan)requestStartTime1.Subtract(requestStartTime)).TotalMilliseconds;
+            Thread.Sleep(Math.Max(randomSleepMilSeconds, bandwidthSleepMilSeconds));
+
+            requestStartTime = DateTime.Now;
+
+            webManager.AutoRedirect = true;
+            result = webManager.HttpPost(url, postData);
+
+            pageCrawled++;
+            return result;
+        }
+
+        #endregion DownloadPage(...)
+
+        #endregion Utilities 
+
+        #endregion Methods
+    }
+}

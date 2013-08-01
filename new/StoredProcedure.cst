@@ -1,0 +1,88 @@
+﻿<%-- 
+Name: Database Opertion Template
+Author: Yang Song
+Description: Create a template to generate database stored procedures
+--%>
+<%@ CodeTemplate Language="C#" TargetLanguage="Text" Src="" Inherits="" Debug="False" CompilerVersion="v3.5" Description="Template description here." %>
+<%@ Property Category="Database" Name="SourceDatabase" Type="SchemaExplorer.DatabaseSchema" Optional="False" Description="Database the tables will come from." %>
+<%@ Property Name="Sector" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The sector of the bot." %>
+<%@ Property Name="BotName" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The name of the bot." %>
+<%@ Property Name="tableEntry" Type="NameValueCollection" Optional="False" %>
+
+<%@ Map Name="CSharpAlias" Src="System-CSharpAlias" Description="System to C# Type Map" %>
+<%@ Assembly Name="SchemaExplorer" %>
+<%@ Assembly Name="CodeSmith.CustomProperties" %>
+<%@ Import Namespace="SchemaExplorer" %>
+<%@ Import Namespace="System.Collections" %>
+<%@ Import Namespace="CodeSmith.CustomProperties" %>
+USE <%= Sector %>
+GO
+
+<%
+    foreach(TableSchema table in SourceDatabase.Tables)
+    {
+        if (!table.Name.Contains("Event_") 
+            && table.Name.Contains(Sector + "_" + BotName)
+            && !table.Name.Contains("_Static"))
+        {
+            string name = table.Name;
+            string tableEntry = name.Replace(Sector + "_", "").Replace(BotName + "_", "").Replace("_", "");
+%>
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[<%= Sector %>_SP_<%= BotName %>_Save<%= tableEntry%>]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].[<%= Sector %>_SP_<%= BotName %>_Save<%= tableEntry%>]
+GO
+CREATE PROCEDURE [dbo].[<%= Sector %>_SP_<%= BotName %>_Save<%= tableEntry%>]
+<%
+TableSchema sourceTable = new TableSchema(this._sourceDatabase, name, "dbo", DateTime.Now, null);
+
+foreach (ColumnSchema column in sourceTable.Columns) {  
+    if (column.Name.ToLower()!="rundate" &&
+        column.Name.ToLower()!="firstfound" &&
+        column.Name.ToLower()!="lastfound" &&
+        column.Name.ToLower()!="runid" &&
+        column.Name.ToLower()!="firstrunid" &&
+        column.Name.ToLower()!="lastrunid" &&
+        column.Name.ToLower()!="id" &&
+        column.Name.ToLower()!="insertiondate")
+    {%>
+		@<%= StringUtil.ToPascalCase(column.Name)%><%="\t\t"%><%= column.NativeType.ToUpper() %>,
+    <%}
+}%>    
+        @RunDate<%="\t\t"%>DATETIME,
+        @RunId<%="\t\t"%>INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	INSERT INTO [dbo].[<%= Sector %>_<%= BotName %>_TotalDeals] (<%
+    int paramCounter = 0;
+    foreach (ColumnSchema column in sourceTable.Columns) {
+        if (!column.Name.Contains("InsertionDate")) {
+%><% if(paramCounter++ > 0){%>, <%}%>[<%= column.Name%>]<%}
+    } %>)
+    VALUES (<%
+    paramCounter = 0;
+    foreach (ColumnSchema column in sourceTable.Columns) {
+        if (!column.Name.Contains("InsertionDate")) {
+%><% if(paramCounter++ > 0){%>, <%}%>@<% 
+        if (column.Name.ToLower()=="firstfound" || column.Name.ToLower()=="lastfound")
+        {
+            Response.Write(", @RunDate");
+        }
+        else if (column.Name.ToLower()=="firstrunid" || column.Name.ToLower()=="lastrunid")
+        {
+            Response.Write(", @RunId");
+        }
+        else
+        {
+            Response.Write(column.Name);
+        }
+        %><%}
+    } %>)
+END
+
+GO
+
+<%      }
+    }
+%>

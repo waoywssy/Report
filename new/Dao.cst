@@ -1,0 +1,113 @@
+﻿<%@ CodeTemplate Language="C#" TargetLanguage="Text" Src="" Inherits="" Debug="False" CompilerVersion="v3.5" Description="Template description here." %>
+<%@ Property Name="Sector" Type="System.String" Default="" Optional="False" Description="The sector of the bot." %>
+<%@ Property Name="BotName" Type="System.String" Default="" Optional="False" Description="The name of the bot." %>
+
+<%@ Map Name="CSharpAlias" Src="System-CSharpAlias" Description="System to C# Type Map" %>
+<%@ Assembly Name="SchemaExplorer" %>
+<%@ Assembly Name="CodeSmith.CustomProperties" %>
+<%@ Import Namespace="SchemaExplorer" %>
+<%@ Import Namespace="System.Collections" %>
+<%@ Import Namespace="CodeSmith.CustomProperties" %>
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Data;
+using System.Data.SqlClient;
+using System.Data.SqlTypes;
+
+using Majestic.Entity.<%= Sector %>;
+using Majestic.Dal.Shared;
+using Majestic.Util;
+using Majestic.Bot.Core.Server;
+using Majestic.Entity.<%= Sector %>.<%= BotName %>;
+
+using Microsoft.ApplicationBlocks.Data;
+using System.Collections;
+
+namespace Majestic.Dal.<%= Sector %>
+{
+    /// <remarks>
+    /// Database access object for <%= BotName %>Dao
+    /// </remarks>
+    public sealed class <%= BotName %>Dao : DaoBase
+    {
+        #region Static Instance
+
+        /// <summary>
+        /// Singleton instance
+        /// </summary>
+        public readonly static <%= BotName %>Dao Instance = new <%= BotName %>Dao();
+
+        #endregion Static Instance
+
+        #region Constants
+
+        /// <summary>
+        /// Caller's name
+        /// </summary>
+        private const string CALLER_CLASS_NAME = "<%= Sector %>";
+
+        #endregion Constants
+
+        #region Fields
+
+        /// <summary>
+        /// Literal representation of database connection
+        /// </summary>
+        private string connectionString;
+
+        #endregion Fields
+
+        #region Constructor
+
+        /// <summary>
+        /// Private constructor to prevent creating instance of this class
+        /// </summary>
+        private <%= BotName %>Dao()
+        {
+            connectionString = ConnectionStringManager.GetNamedConnectionString(CALLER_CLASS_NAME);
+        }
+
+        #endregion Constructor
+
+        #region Property
+
+        /// <summary>
+        /// Internal attributes for connection string
+        /// </summary>
+        private string ConnectionString
+        {
+            get { return connectionString; }
+        }
+
+        #endregion Property
+
+
+        #region Methods
+        
+        public void SaveEntity<T>(string spName, T entity)
+        {
+            ComUtil.SaveEntity<T>(spName, entity, connectionString);
+        }
+
+        public void ExecuteNonQuery(string spName)
+        {
+            try
+            {
+                SqlHelper.ExecuteNonQuery(connectionString, CommandType.StoredProcedure, spName);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public List<T> GetEntities<T>(string spName)
+        {
+            return ComUtil.GetEntities<T>(spName, connectionString);
+        }
+        
+        #endregion Methods
+    }
+}

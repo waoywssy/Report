@@ -41,8 +41,11 @@ function deploy(){
 		asort($scripts);
 		$i = 1;
 		foreach ($scripts as $key => $value) {
-			$temp = substr($value, 80);
-			$result .= t($i++ . ') ' . $temp . '<br />');		
+			if (stripos($value, "path.txt") <= 0){
+				// doesn't display path.txt
+				$temp = substr($value, 80);
+				$result .= t($i++ . ') ' . $temp . '<br />');		
+			}
 		}
 	}
 	else {

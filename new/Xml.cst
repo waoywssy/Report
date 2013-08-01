@@ -1,0 +1,26 @@
+﻿<%-- 
+Name: XML Configure file Template
+Author: Yang Song
+Description: Create a segment of config file code
+--%>
+<%@ CodeTemplate Language="C#" TargetLanguage="C#" Debug="False" Description="Create a segment of config file code" %>
+<%@ Property Name="Sector" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The sector of the bot." %>
+<%@ Property Name="BotName" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The name of the bot." %>
+<%@ Property Category="Database" Name="SourceDatabase" Type="SchemaExplorer.DatabaseSchema" Optional="False" Description="Database the tables will come from." %>
+
+<%@ Assembly Name="SchemaExplorer" %>
+<%@ Assembly Name="CodeSmith.CustomProperties" %>
+<%@ Import Namespace="SchemaExplorer" %>
+<%@ Import Namespace="System.Collections" %>
+<%@ Import Namespace="CodeSmith.CustomProperties" %>
+
+<%@ Property Name="Regexes" Type="StringCollection" Default="" Optional="True" Category="Bot" Description="The id of the job." %>
+
+
+<<%= BotName %>
+
+    sleepTime="1"
+    maxHourlyPageView="4500"
+    maxRetryTime="5"
+    proxy="127.0.0.1:8888"
+/>

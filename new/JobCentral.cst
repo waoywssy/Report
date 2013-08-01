@@ -1,0 +1,64 @@
+﻿<%-- 
+Name: Database Opertion Template
+Author: Yang Song
+Description: Create a template to generate jobcentral database file
+--%>
+<%@ CodeTemplate Language="C#" TargetLanguage="Text" Src="" Inherits="" Debug="False" CompilerVersion="v3.5" Description="Template description here." %>
+<%@ Property Name="Sector" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The sector of the bot." %>
+<%@ Property Name="BotName" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The name of the bot." %>
+<%@ Property Name="JobId" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The id of the job." %>
+<%@ Assembly Name="CodeSmith.CustomProperties" %>
+<%@ Import Namespace="System.Collections" %>
+<%@ Import Namespace="CodeSmith.CustomProperties" %>
+
+<%@ Property Name="Regexes" Type="StringCollection" Default="" Optional="False" Category="EntityParams" Description="The id of the job." %>
+Use JobCentral;
+GO
+<%
+    string[] jobIds = JobId.Split(',',';');
+    int i = 0;
+    foreach (string jobId in jobIds){
+%>
+DECLARE @JobId<%= i.ToString()%> INT;
+SET @JobId<%= i.ToString()%> = <%= jobId.Trim() %>;
+<%
+    i++;
+    }
+%>
+/*************  CLEAN UP **************************/
+-- Remove job-regex
+<%
+    i = 0;
+    foreach (string jobId in jobIds){
+%>
+DELETE FROM JobCentral.dbo.Job_Regex WHERE Job_Id = @JobId<%= i.ToString()%>;
+<%
+    i++;
+    }
+%>
+-- Remove the job(s)
+<%
+    i = 0;
+    foreach (string jobId in jobIds){ 
+%>
+DELETE Maj_Jobs WHERE JobId = @JobId<%= i.ToString()%>;
+<%
+    i++;
+    }
+%>
+
+--------------------------Create Jobs ----------------------------
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 
+<%
+    i = 0;
+    foreach (string jobId in jobIds){
+%>
+INSERT INTO Maj_Jobs(JobID, JobName, Disabled, Class, Config, Url, GoMinute, GoHour, GoDayOfWeek, SavePages, ServerName)
+VALUES(@JobId<%= i.ToString()%>, '<%= Sector %>', 1, 'Majestic.Bot.Job.<%= Sector %>.<%= BotName %>', '<%= Sector %>', NULL, NULL, NULL, NULL, 0, 'BORYI');
+<%
+    i++;
+    }
+%>
+
+GO

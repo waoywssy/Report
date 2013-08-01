@@ -6,6 +6,7 @@ function manage_bots(){
 		$id = $_POST['id'];
 		$priority = $_POST['priority'];
 		$botname = $_POST['botname'];
+		$filename = $_POST['filename'];
 		$botid = $_POST['bts_id'];
 		$jobid = $_POST['jobid'];
 		$qaAtBoryi = $_POST['qaAtBoryi'];
@@ -32,8 +33,8 @@ function manage_bots(){
 
 			/*  validation here*/
 			$sql = "INSERT INTO mj_bots
-				(`bts_id`, `botname`, `bts_sct_id`, `qaAtBoryi`, `qaTime`, `qaTimes`, `priority`, `jobid`, `keywords`, `version`)
-				VALUES($botid, '$botname', $sector, $qaAtBoryi, $qaTime, $qaFreq, $priority, '$jobid', '$keywords', '$version')";
+				(`bts_id`, `botname`, `bot_file_name`, `bts_sct_id`, `qaAtBoryi`, `qaTime`, `qaTimes`, `priority`, `jobid`, `keywords`, `version`)
+				VALUES($botid, '$botname', '$filename', $sector, $qaAtBoryi, $qaTime, $qaFreq, $priority, '$jobid', '$keywords', '$version')";
 				
 			$records = db_query($sql);
 			//echo mysql_insert_id();
@@ -41,15 +42,16 @@ function manage_bots(){
 		else if ($op == 'edit') 
 		{
 			watchdog('edit', serialize($_POST));
-
-			/*  validation here*/
-			$sql = "UPDATE mj_bots 
-					SET bts_id = $botid, botname = '$botname', bts_sct_id = $sector, qaAtBoryi = $qaAtBoryi, 
+			
+			global $user;
+			//if($user->uid==1){
+				/*  validation here*/
+				$sql = "UPDATE mj_bots 
+						SET bts_id = $botid, botname = '$botname', bot_file_name = '$filename', bts_sct_id = $sector, qaAtBoryi = $qaAtBoryi, 
 						qaTime = $qaTime, qaTimes = $qaFreq, priority = $priority, jobid = '$jobid', keywords = '$keywords', version = '$version'
-					WHERE id = $id";
-			//$records = 
-					db_query($sql);
-					//var_dump($sql);
+						WHERE id = $id";
+				db_query($sql);
+			//}
 		}
 	}
 	else

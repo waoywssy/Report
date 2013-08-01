@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<codeSmith xmlns="http://www.codesmithtools.com/schema/csp.xsd">
+  <variables>
+    <add key="Conn" value="Data Source=localhost;Initial Catalog=$database;User ID=sa;Password=P@ssw0rd" />
+    <add key="path" value="$dir" />
+    <add key="BotName" value="$botname" />
+    <add key="JobId" value="$jobid" />
+    <add key="Sector" value="$sector" />
+    <add key="pType" value="SchemaExplorer.SqlSchemaProvider,SchemaExplorer.SqlSchemaProvider" />
+  </variables>
+  <propertySets>
+    <propertySet name="Bot" output="$(path)Job\$(BotName).cs" template="Bot.cst">
+      <property name="UseJson">False</property>
+      <property name="Sector">$(Sector)</property>
+      <property name="BotName">$(BotName)</property>
+      <property name="JobId">$(JobId)</property>
+      <property name="Regexes">$regex</property>
+      <property name="SourceDatabase">
+        <connectionString>$(Conn)</connectionString>
+        <providerType>$(pType)</providerType>
+      </property>
+    </propertySet>
+    <propertySet name="BotDao" output="$(path)Dao\$(BotName)Dao.cs" template="Dao.cst">
+      <property name="SourceDatabase">
+        <connectionString>$(Conn)</connectionString>
+        <providerType>$(pType)</providerType>
+      </property>
+      <property name="Sector">$(Sector)</property>
+      <property name="BotName">$(BotName)</property>
+      <property name="TableEntitySaveOnly">
+      </property>
+    </propertySet>
+    $entity
+    <!--propertySet name="EntityBase" output="$(path)Entity\$(BotName)Entity.cs" template="EntityBase.cst">
+      <property name="Sector">$(Sector)</property>
+      <property name="BotName">$(BotName)</property>
+    </propertySet-->
+
+    <propertySet name="JobCentral" output="$(path)Database\DATA_JobCentral_$(BotName)_$(JobId).sql" template="JobCentral.cst">
+      <property name="Sector">$(Sector)</property>
+      <property name="BotName">$(BotName)</property>
+      <property name="JobId">$(JobId)</property>
+      <property name="Regexes">$regex</property>
+    </propertySet>
+    <!--propertySet name="StoredProcedure" output="$(path)Database\SP_$(Sector)_$(BotName).sql" template="StoredProcedure.cst">
+      <property name="SourceDatabase">
+        <connectionString>$(Conn)</connectionString>
+        <providerType>$(pType)</providerType>
+      </property>
+      <property name="Sector">$(Sector)</property>
+      <property name="BotName">$(BotName)</property>
+    </propertySet-->
+    <propertySet name="master" output="$(path)Database\master.bat" template="master.cst">
+      <property name="Sector">$(Sector)</property>
+      <property name="BotName">$(BotName)</property>
+      <property name="JobId">$(JobId)</property>
+    </propertySet>
+    <propertySet name="NLog" output="$(path)Config\$(Sector).nlog" template="NLog.cst">
+      <property name="Sector">$(Sector)</property>
+      <property name="BotName">$(BotName)</property>
+    </propertySet>
+    <propertySet name="Xml" output="$(path)Config\$(Sector).xml" template="Xml.cst">
+      <property name="SourceDatabase">
+        <connectionString>$(Conn)</connectionString>
+        <providerType>$(pType)</providerType>
+      </property>
+      <property name="Sector">$(Sector)</property>
+      <property name="BotName">$(BotName)</property>
+      <property name="Regexes">$regex</property>
+    </propertySet>
+    <propertySet name="DBCreator" output="$(path)Database\DDL_Database_$(Sector).sql" template="DBCreator.cst">
+      <property name="Sector">$(Sector)</property>
+    </propertySet>
+        <propertySet name="DBSchema" output="$(path)Database\DDL_$(Sector)_$(BotName).sql" template="DBSchema.cst">
+      <property name="Sector">$(Sector)</property>
+    </propertySet>
+  </propertySets>
+</codeSmith>

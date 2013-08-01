@@ -76,7 +76,8 @@ function zip_files($bid, $files){
 	$zip = new ZipArchive;
 	$appendix = gmDate("Ymd\THis\Z");
 	$path = drupal_get_path('module', 'reports') . '/temp/';
-	$file =  $path . $bid . '-' . $appendix . '.zip';
+	$tmp_dir = $path . $bid . '-' . $appendix;
+	$file =  $tmp_dir . '.zip';
 	if (!file_exists($file)){
 		if($zip->open($file, ZipArchive::CREATE)!==TRUE)
 		{
@@ -84,8 +85,21 @@ function zip_files($bid, $files){
 			die("* Sorry ZIP creation failed");
 		}
 		else {
+			//mkdir($tmp_dir);
+
 			foreach($files as $key => $val){
 				if (!empty($val)){
+					/*
+					$tmp_file = str_ireplace('sites\\all\\modules\\reports\\inc', '', dirname(__FILE__)) . str_replace('/', '\\', $tmp_dir) . '\\' . str_ireplace("C:\\Repository\\QAG\\Bot\\Releases\\", '' , str_replace('/', '\\', $val));
+
+					if (!file_exists(dirname($tmp_file)))
+					{
+						var_dump(dirname($tmp_file));
+						mkdir(dirname($tmp_file));
+					}
+
+					copy($val, $tmp_file);
+*/
 					$zip->addFile($val);
 				}
 			}

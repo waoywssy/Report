@@ -32,24 +32,10 @@
 */
 		//drupal_add_css($bots_path . '/css/tree.css');
 
-		return '<table id="botsList"></table><div id="botsPager"></div>
-				<div id="pop-up-tree" style="display:none;" title="Choose files belong to the bot"><ul id="treeDemo" class="ztree"></ul></div>
-				<div class="contextMenu" id="myMenu1" style="display:none">
-					<ul style="width:200px;">
-						<li id="contextupload" style="background:none!important">
-							<span class="ui-icon ui-icon-plus" style="float:left"></span>
-							<span style="font-size:11px; font-family:Verdana">Upload</span>
-						</li>
-					</ul>
-				</div>
-				<div id="upload_container" style="display:none;">
-					<form>
-						<div id="queue"></div>
-						<input id="file_upload" name="file_upload" type="file" multiple="true">
-						<input type="hidden" id="h_bid" value=0 />
-						<input type="hidden" id="h_username" value="'.$user->name .'" />
-					</form>
-				</div>';
+		$tpl_dir = dirname(dirname(__FILE__)) . '\\tpl\\';
+    $html = file_get_contents($tpl_dir . 'upload_menu.tpl');
+		$html = str_replace('$username', $user->name, $html);
+	    return $html;
 	}
 	
 	function get_data(){
@@ -94,15 +80,15 @@
 		// typical case is that the user type 0 for the requested page
 		if($start < 0) $start = 0;
 		
-		$sql = "SELECT id, bts_id, botname, sector, qaAtBoryi, qaTimes as qaFreq, qaTime, priority, jobid, keywords, version
+		$sql = "SELECT id, bts_id, botname, bot_file_name, sector, qaAtBoryi, qaTimes as qaFreq, qaTime, priority, jobid, keywords, version
 			FROM
 			(
-				SELECT id, bts_id, botname, sector, qaAtBoryi, qaTimes, qaTime, Priority, 0 AS Order1 , jobid, keywords, version
+				SELECT id, bts_id, botname, bot_file_name, sector, qaAtBoryi, qaTimes, qaTime, Priority, 0 AS Order1 , jobid, keywords, version
 				FROM mj_bots 
 				LEFT OUTER JOIN mj_sectors on bts_sct_id = sct_id
 				WHERE Priority IS NOT NULL
 				UNION
-				SELECT id, bts_id, botname, sector, qaAtBoryi, qaTimes, qaTime, Priority, 1 AS Order1 , jobid, keywords, version
+				SELECT id, bts_id, botname, bot_file_name, sector, qaAtBoryi, qaTimes, qaTime, Priority, 1 AS Order1 , jobid, keywords, version
 				FROM mj_bots 
 				LEFT OUTER JOIN mj_sectors on bts_sct_id = sct_id
 				WHERE Priority IS NULL
@@ -169,6 +155,7 @@
 								$row->id,
 								$row->bts_id,
 								$row->botname,
+								$row->bot_file_name,
 								$row->sector,
 								$row->qaAtBoryi,
 								$qaFreq,

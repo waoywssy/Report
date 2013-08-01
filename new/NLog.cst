@@ -1,0 +1,31 @@
+﻿<%-- 
+Name: NLog Configure file Template
+Author: Yang Song
+Description: Create a segment of config file code
+--%>
+<%@ CodeTemplate Language="C#" TargetLanguage="C#" Debug="False" Description="Create a segment of config file code" %>
+<%@ Property Name="Sector" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The sector of the bot." %>
+<%@ Property Name="BotName" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The name of the bot." %>
+    <target name="Event_<%= BotName %>" type="Database" keepConnection="false" useTransactions="false"
+	  dbProvider="sqlserver" connectionStringName="<%= Sector %>">
+      <commandText>
+        INSERT INTO Event_<%= BotName %>(EventTime, SeverityID, JobID, RunID, PageID, Subject, Details, SourceFile, LineNum, ColumnNum, Class, Method, AssemblyFile,  AssemblyVersion)
+        VALUES(@EventTime, @SeverityID, @JobID, @RunID, @PageID, @Subject, @message, @SourceFile, @LineNum, @ColumnNum, @Class, @Method, @AssemblyFile,  @AssemblyVersion)
+      </commandText>
+      <parameter name="@EventTime" layout="${date}"/>
+      <parameter name="@SeverityID" layout="${event-context:SeverityID}"/>
+      <parameter name="@JobId" layout="${event-context:JobId}"/>
+      <parameter name="@RunId" layout="${event-context:RunId}"/>
+      <parameter name="@PageId" layout="${event-context:PageId}"/>
+      <parameter name="@Subject" layout="${event-context:Subject}"/>
+      <parameter name="@message" layout="${message}"/>
+      <parameter name="@SourceFile" layout="${event-context:SourceFile}"/>
+      <parameter name="@LineNum" layout="${event-context:LineNumber}"/>
+      <parameter name="@ColumnNum" layout="${event-context:ColumnNumber}"/>
+      <parameter name="@Class" layout="${event-context:ClassName}"/>
+      <parameter name="@Method" layout="${event-context:Method}"/>
+      <parameter name="@AssemblyFile" layout="${event-context:AssemblyFile}"/>
+      <parameter name="@AssemblyVersion" layout="${event-context:AssemblyVersion}"/>
+    </target>
+    
+    <logger name="Majestic.Bot.Job.<%= Sector %>.<%= BotName %>" minlevel="Info" maxlevel="Fatal" writeTo="Event_<%= BotName %>" />

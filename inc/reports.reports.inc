@@ -41,7 +41,9 @@
 	    	$sql = "SELECT issue, delivery, type, employee, comment, botname, others FROM `mj_reports` left outer join `mj_bots` on bts_id = rpt_bts_id WHERE `rdate` = '$date' and type<> 'Routine QA'
 				order by employee, delivery desc";
 
-	    	$output = 'Daily repot of ' . $date . ':<br /><br />';
+			$output = '<b>Boryi - weekly report</b><br /><br />';
+			$output .= '<b>Boryi - a summary of today\'s work</b><br /><br />';
+	    	$output .= 'Daily repot of ' . $date . ':<br /><br />';
 
 	    	$output .= 'Hi Ian and Jesse,<br/><br/>';
 	    	$output .= 'Here is a summary of today\'s work:<br/><br/>';
@@ -66,11 +68,11 @@
 					else if ($data->comment=='Site Changed'){
 						$output .=' been working on the ';
 					}
-					else if ($data->type=='Development' ||
-						$data->type=='Enhancement'){
+					else if ($data->type=='Development' 
+							|| $data->type=='Enhancement'){
 						$output .=' been working on the ';
 					}
-					else{
+					else {
 						$output .='checked the ';
 						$skip_type = true;
 					}
@@ -98,7 +100,7 @@
 				$output .= '<br/>The SVN server just runs out of disk space again and we failed to commit todays scripts. Please check.<br/>';
 			}
 			if (isset($new)){
-				$output .= '<br/>We have finished most of the development/maintenance tasks. Please assign new tasks to us. Thanks. <br/>';
+				$output .= '<br/>We have finished most of the development/maintenance. Please assign new tasks to us. Thanks. <br/>';
 			}
 
 			$output .= '<br/>best wishes,<br/>';

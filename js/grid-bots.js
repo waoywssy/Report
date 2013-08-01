@@ -133,11 +133,12 @@ jQuery().ready(function(){
 	var botsView = jQuery("#botsList").jqGrid({
 		url:targetPath,
 		datatype: "json",
-		colNames:['Id', 'Bot Id','Bot Name', 'Sector', 'QA at Boryi?', 'QA Frequency','QA Time','Priority','JobId', 'Keywords', 'Version'], 
+		colNames:['Id', 'Bot Id','Bot Name','File Name', 'Sector', 'QA at Boryi?', 'QA Frequency','QA Time','Priority','JobId', 'Keywords', 'Version'], 
 		colModel:[ 
 				{name:'id', index:'id', width:0, editable: true, hidden:true, search:false, },
 				{name:'bts_id', index:'bts_id', width:10, editable: true, editrules:{number:true, required:true, maxValue:99999, custom:true, custom_func:check_id,}, search:false, searchoptions:{sopt:['eq'], searchOnEnter:true}}, 
 				{name:'botname', index:'botname', width:45, editable: true, editrules:{required:true, custom:true, custom_func:check_name,}, searchoptions:{sopt:['cn'], searchOnEnter:true}}, 
+			{name:'filename', index:'filename', width:45, editable: true, editrules:{required:true, custom:true, custom_func:check_name,} /*searchoptions:{sopt:['cn'], searchOnEnter:true}*/}, 
 				{name:'sector', index:'sector', width:40, editable: true,edittype:"select",
 						editoptions: { value: "1:E\u2013Commerce;2:Retail \u2013 Softline ;3:Retail \u2013 Hardline ;4:Medical Devices;5:Telecommunications;6:Lodging;7:Auto Retail;8:Video Games;9:Real Estate;10:Store Locators;11:AirLines;12:R&D;13:Homebuilders;14:Mobile Phone;15:FExchange;16:Consumer Technology;20:Restaurant;19:KeywordSearches;22:Cable And Satellite;23:Christies"/*21:SocialNetworking;*/ },
 						search:true, searchoptions:{sopt:['cn'], searchOnEnter:true}},

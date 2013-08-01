@@ -1,0 +1,187 @@
+<%-- 
+Name:
+Author: 
+Description: 
+--%>
+<%@ CodeTemplate Language="C#" TargetLanguage="Text" Src="" Inherits="" Debug="False" CompilerVersion="v3.5" Description="Template description here." %>
+<%@ Property Name="Sector" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The sector of the bot." %>
+<%@ Property Name="BotName" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The name of the bot." %>
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+using System.Data.SqlTypes;
+
+namespace Majestic.Entity.<%= Sector %>.<%= BotName %>
+{
+    /// <remarks>
+    /// Base class of the <%= BotName %> Entity
+    /// </remarks>
+    public class <%= BotName %>Entity
+    {
+        #region ProtectedMethods
+
+        #region ReadBoolean(...)
+
+        /// <summary>
+        /// Reads a string representation of decimal value and 
+        /// parse it to a SqlBoolean
+        /// </summary>
+        /// <param name="value">A string representation of decimal value</param>
+        /// <param name="defaultValue">The default value returned</param>
+        /// <returns>A SqlBoolean value</returns>
+        protected SqlBoolean ReadBoolean(string value, SqlBoolean defaultValue)
+        {
+            SqlBoolean parsedValue = defaultValue;
+
+            try
+            {
+                parsedValue = SqlBoolean.Parse(value);
+            }
+            catch { }
+
+            return parsedValue;
+        }
+
+        #endregion ReadBoolean(...)
+
+        #region ReadInt(...)
+
+        /// <summary>
+        /// Reads a string representation of int value and 
+        /// parse it to a SqlInt32
+        /// </summary>
+        /// <param name="value">A string representation of int value</param>
+        /// <param name="defaultValue">The default value returned</param>
+        /// <returns>A SqlInt32 value</returns>
+        protected SqlInt32 ReadInt(string value, SqlInt32 defaultValue)
+        {
+            SqlInt32 parsedValue = defaultValue;
+
+            try
+            {
+                parsedValue = SqlInt32.Parse(value);
+            }
+            catch { }
+
+            return parsedValue;
+        }
+
+        #endregion ReadInt(...)
+
+        #region ReadBigInt(...)
+
+        /// <summary>
+        /// Reads a string representation of int value and 
+        /// parse it to a SqlInt64
+        /// </summary>
+        /// <param name="value">A string representation of int value</param>
+        /// <param name="defaultValue">The default value returned</param>
+        /// <returns>A SqlInt64 value</returns>
+        protected SqlInt64 ReadBigInt(string value, SqlInt64 defaultValue)
+        {
+            SqlInt64 parsedValue = defaultValue;
+
+            try
+            {
+                parsedValue = SqlInt64.Parse(value);
+            }
+            catch { }
+
+            return parsedValue;
+        }
+
+        #endregion ReadBigInt(...)
+
+        #region ReadString(...)
+
+        /// <summary>
+        /// Reads a string and parse it to a SqlString
+        /// </summary>
+        /// <param name="value">A string value</param>
+        /// <param name="defaultValue">The default value returned</param>
+        /// <returns>A SqlString value</returns>
+        protected SqlString ReadString(string value, SqlString defaultValue)
+        {
+            SqlString parsedValue = value ?? defaultValue;
+
+            return parsedValue;
+        }
+
+        #endregion ReadString(...)
+
+        #region ReadMoney(...)
+
+        /// <summary>
+        /// Reads a string representation of decimal value and 
+        /// parse it to a SqlMoney
+        /// </summary>
+        /// <param name="value">A string representation of decimal value</param>
+        /// <param name="defaultValue">The default value returned</param>
+        /// <returns>A SqlMoney value</returns>
+        protected SqlMoney ReadMoney(string value, SqlMoney defaultValue)
+        {
+            SqlMoney parsedValue = defaultValue;
+
+            try
+            {
+                parsedValue = SqlMoney.Parse(value);
+            }
+            catch { }
+
+            return parsedValue;
+        }
+
+        #endregion ReadMoney(...)
+
+        #region ReadDecimal(...)
+
+        /// <summary>
+        /// Reads a string representation of decimal value and 
+        /// parse it to a SqlDecimal
+        /// </summary>
+        /// <param name="value">A string representation of decimal value</param>
+        /// <param name="defaultValue">The default value returned</param>
+        /// <returns>A SqlDecimal value</returns>
+        protected SqlDecimal ReadDecimal(string value, SqlDecimal defaultValue)
+        {
+            SqlDecimal parsedValue = defaultValue;
+
+            try
+            {
+                parsedValue = SqlDecimal.Parse(value);
+            }
+            catch { }
+
+            return parsedValue;
+        }
+
+        #endregion ReadDecimal(...)
+
+        #region ReadDateTime(...)
+
+        /// <summary>
+        /// Reads a string representation of int value and 
+        /// parse it to a SqlDateTime
+        /// </summary>
+        /// <param name="value">A string representation of int value</param>
+        /// <param name="defaultValue">The default value returned</param>
+        /// <returns>A SqlDateTime value</returns>
+        protected SqlDateTime ReadDateTime(string value, SqlDateTime defaultValue)
+        {
+            SqlDateTime parsedValue = defaultValue;
+
+            try
+            {
+                parsedValue = SqlDateTime.Parse(value);
+            }
+            catch { }
+
+            return parsedValue;
+        }
+
+        #endregion ReadDateTime(...)
+
+        #endregion ProtectedMethods
+    }
+}

@@ -1,0 +1,211 @@
+﻿<%-- 
+Name: Database Table Properties
+Author: Yang Song
+Description: Create a class of entity which has properties from a database table
+--%>
+<%@ CodeTemplate Language="C#" TargetLanguage="C#" Debug="False" Description="Create a list of properties from database table." %>
+<%@ Property Name="SourceTable" Type="SchemaExplorer.TableSchema" Category="Context" Description="Table that the object is based on." %>
+<%@ Property Name="Sector" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The sector of the bot." %>
+<%@ Property Name="BotName" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The name of the bot." %>
+<%@ Property Name="EntityName" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The name of the entity." %>
+<%@ Property Name="NeedCollection" Type="System.Boolean" Default="True" Optional="True" Category="EntityParams" Description="Need collection class or not." %>
+
+<%@ Map Name="CSharpAlias" Src="System-CSharpAlias" Description="System to C# Type Map" %>
+<%@ Assembly Name="SchemaExplorer" %>
+<%@ Import Namespace="SchemaExplorer" %>
+<script runat="template">
+private int paramCounter = 0;
+</script>
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Reflection;
+using System.Data.SqlTypes;
+
+namespace Majestic.Entity.<%= Sector %>.<%= BotName %>
+{
+    /// <remarks>
+    /// Data entity for <%= EntityName %>
+    /// </remarks>
+    public class <%= EntityName %> : <%= BotName %>Entity
+    {
+        #region Field 
+       
+    <% foreach (ColumnSchema column in this.SourceTable.Columns) {  
+        if (column.Name.ToLower()!="rundate" &&
+            column.Name.ToLower()!="firstfound" &&
+            column.Name.ToLower()!="lastfound" &&
+            column.Name.ToLower()!="runid" &&
+            column.Name.ToLower()!="firstrunid" &&
+            column.Name.ToLower()!="lastrunid" &&
+            column.Name.ToLower()!="id" &&
+            column.Name.ToLower()!="insertiondate")
+        {
+        %>
+        private Sql<%= CSharpAlias[column.SystemType.Name] %> <%= StringUtil.ToCamelCase(column.Name) %>;
+    <% }} %>
+        
+        #endregion Field 
+        
+        
+        #region Properties 
+        
+    <% foreach (ColumnSchema column in this.SourceTable.Columns) {  
+        if (column.Name.ToLower()!="rundate" &&
+            column.Name.ToLower()!="firstfound" &&
+            column.Name.ToLower()!="lastfound" &&
+            column.Name.ToLower()!="runid" &&
+            column.Name.ToLower()!="firstrunid" &&
+            column.Name.ToLower()!="lastrunid" &&
+            column.Name.ToLower()!="id" &&
+            column.Name.ToLower()!="insertiondate")
+        {
+        %>
+        /// <remarks>
+        /// Property for <%= StringUtil.ToCamelCase(column.Name) %>
+        /// </remarks>
+        public Sql<%= CSharpAlias[column.SystemType.Name] %> <%= StringUtil.ToPascalCase(column.Name) %>
+        {
+            get { return <%= StringUtil.ToCamelCase(column.Name) %>; }
+            set { <%= StringUtil.ToCamelCase(column.Name) %> = value; }
+        }
+    <% }} %>
+    
+        #endregion Properties 
+        
+        
+        #region Constructors 
+        
+        /// <summary>
+        /// Initializes an instance of <%= EntityName %> Entity
+        /// </summary>
+        public <%= EntityName %>() { }
+        
+
+        
+        /// <summary>
+        /// Initializes an instance of <%= EntityName %> Entity with initial value
+        /// </summary>
+        public <%= EntityName %>(<% foreach (ColumnSchema column in this.SourceTable.Columns) {  
+                if (column.Name.ToLower()!="rundate" &&
+                    column.Name.ToLower()!="firstfound" &&
+                    column.Name.ToLower()!="lastfound" &&
+                    column.Name.ToLower()!="runid" &&
+                    column.Name.ToLower()!="firstrunid" &&
+                    column.Name.ToLower()!="lastrunid" &&
+                    column.Name.ToLower()!="id" &&
+                    column.Name.ToLower()!="insertiondate")
+                {%><% if(paramCounter > 0){%>, <%}%>string <%= StringUtil.ToCamelCase(column.Name) %><% paramCounter++;%><% }} %>)
+        {
+            <% foreach (ColumnSchema column in this.SourceTable.Columns) {  
+                if (column.Name.ToLower()!="rundate" &&
+                    column.Name.ToLower()!="firstfound" &&
+                    column.Name.ToLower()!="lastfound" &&
+                    column.Name.ToLower()!="runid" &&
+                    column.Name.ToLower()!="firstrunid" &&
+                    column.Name.ToLower()!="lastrunid" &&
+                    column.Name.ToLower()!="id" &&
+                    column.Name.ToLower()!="insertiondate")
+                {
+                %>
+            <% if (CSharpAlias[column.SystemType.Name].Equals("String")){%>
+            this.<%= StringUtil.ToCamelCase(column.Name) %> = <%= StringUtil.ToCamelCase(column.Name) %>;
+            <%}
+            else if (CSharpAlias[column.SystemType.Name].Equals("Int32")){%>
+            this.<%= StringUtil.ToCamelCase(column.Name) %> = ReadInt(<%= StringUtil.ToCamelCase(column.Name) %>, SqlInt32.Null);
+            <%}
+            else if (CSharpAlias[column.SystemType.Name].Equals("Int64")){%>
+            this.<%= StringUtil.ToCamelCase(column.Name) %> = ReadBigInt(<%= StringUtil.ToCamelCase(column.Name) %>, SqlInt64.Null);
+            <%}
+            else if (CSharpAlias[column.SystemType.Name].Equals("Decimal")){%>
+            this.<%= StringUtil.ToCamelCase(column.Name) %> = ReadDecimal(<%= StringUtil.ToCamelCase(column.Name) %>, SqlDecimal.Null);
+            <%}
+            else if (CSharpAlias[column.SystemType.Name].Equals("Money")){%>
+            this.<%= StringUtil.ToCamelCase(column.Name) %> = ReadMoney(<%= StringUtil.ToCamelCase(column.Name) %>, SqlMoney.Null);
+            <%}
+            else if (CSharpAlias[column.SystemType.Name].Equals("Boolean")){%>
+            this.<%= StringUtil.ToCamelCase(column.Name) %> = ReadBoolean(<%= StringUtil.ToCamelCase(column.Name) %>, SqlBoolean.Null);
+            <%}
+            else if (CSharpAlias[column.SystemType.Name].Equals("DateTime")){%>
+            this.<%= StringUtil.ToCamelCase(column.Name) %> = ReadDateTime(<%= StringUtil.ToCamelCase(column.Name) %>, SqlDateTime.Null);
+            <%}
+            
+            }} %>
+        }
+        
+        
+        public override string ToString()
+        {
+            StringBuilder ret = new StringBuilder();
+            ret.Append("{");
+            foreach (PropertyInfo property in this.GetType().GetProperties())
+            {
+                ret.Append(property.Name).Append(":").Append(property.GetValue(this, null)).Append(",");
+            }
+            ret.Remove(ret.Length - 1, 1);
+            ret.Append("}");
+            return ret.ToString();
+        }
+        
+        #endregion Constructors 
+    }
+    
+    <% if (NeedCollection) { %>
+    
+    /// <remarks>
+    /// Data collection entity for <%= EntityName %>
+    /// </remarks>
+    public class <%= EntityName %>Collection : List<<%= EntityName %>>
+    {
+        #region Constructor
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public <%= EntityName %>Collection() { }
+
+        #endregion Constructor
+
+
+        #region Methods
+
+        #region Add(...)
+
+        /// <summary>
+        /// Add a new <%= EntityName %> instance
+        /// </summary>
+        public void Add(<%
+            paramCounter = 0;
+            foreach (ColumnSchema column in this.SourceTable.Columns) {  
+                if (column.Name.ToLower()!="rundate" &&
+                    column.Name.ToLower()!="firstfound" &&
+                    column.Name.ToLower()!="lastfound" &&
+                    column.Name.ToLower()!="runid" &&
+                    column.Name.ToLower()!="firstrunid" &&
+                    column.Name.ToLower()!="lastrunid" &&
+                    column.Name.ToLower()!="id" &&
+                    column.Name.ToLower()!="insertiondate")
+                {
+                %><% if(paramCounter++ > 0){%>, <%}%>string <%= StringUtil.ToCamelCase(column.Name) %><% }} %>)
+        {
+            this.Add(new <%= EntityName %>(<%
+                paramCounter = 0;
+                foreach (ColumnSchema column in this.SourceTable.Columns) {  
+                if (column.Name.ToLower()!="rundate" &&
+                    column.Name.ToLower()!="firstfound" &&
+                    column.Name.ToLower()!="lastfound" &&
+                    column.Name.ToLower()!="runid" &&
+                    column.Name.ToLower()!="firstrunid" &&
+                    column.Name.ToLower()!="lastrunid" &&
+                    column.Name.ToLower()!="id" &&
+                    column.Name.ToLower()!="insertiondate")
+                {
+                %><% if(paramCounter++ > 0){%>, <%}%><%= StringUtil.ToCamelCase(column.Name) %><% }} %>));
+        }
+
+        #endregion Add(...)
+
+        #endregion Methods
+    }
+    <% } %>
+}
