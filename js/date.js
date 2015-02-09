@@ -1,7 +1,7 @@
 $(function() {
 	$("#slider-range-min").slider({
 		range: "min",
-		step:0.5,
+		step:0.1,
 		min: 0.10,
 		max: 8.00,
 		slide: function(event, ui) {

@@ -17,13 +17,14 @@
 			mkdir($targetPath);
 		}
 
-  	if (!empty($_FILES) && $_POST['token'] == $verifyToken) {
+  	if (!empty($_FILES) //&& $_POST['token'] == $verifyToken
+  		) {
 		//		header("Content-Type:text/html;charset=utf8");
 				$tempFile = $_FILES['Filedata']['tmp_name'];
 				$filename = iconv('utf-8','gb2312',$_FILES['Filedata']['name']);
 				
 				$targetFile = rtrim($targetPath,'/') . '/' . $filename;
-				
+
 				// Validate the file type *.cs;*.regex;.sql;*.nlog;*.xml;*.bat;*.bat;
 				$fileTypes = array('regex','sql'); // File extensions
 				$fileParts = pathinfo($_FILES['Filedata']['name']);
@@ -35,13 +36,34 @@
 							
 		    			$convertor_path = getcwd() . '\\sites\\all\\modules\\reports\\';
 							// chdir('D:\\Program Files (x86)\\CodeSmith\\v6.5\\'); 
-		    			echo shell_exec($convertor_path . 'files\\UTF82ISO.exe ' . $targetFile . " " . $targetFile); 
+
+						$cmd = '"' . $convertor_path . 'files\\UTF82ISO.exe"' . ' "' . $targetFile . '" "' . $targetFile . '"';
+						$cmd = str_replace('/', '\\', $cmd);
+						//echo $cmd;
+		    			echo shell_exec($cmd); 
 
 							$target_str = file_get_contents($targetFile);
-
 							preg_match_all('/create \s*table[^(\.]+\.?\s*\[?([^\(\]]+)/iu', $target_str, $out, PREG_SET_ORDER);
+
+								//var_dump($out);
+
 							foreach ($out as $key => $value) {
 								if (strpos($out[$key][1], 'Event_')===false){
+
+									$index = strrpos($out[$key][1], '_');
+									$tmp = substr($out[$key][1],  $index + 1, strlen($out[$key][1]) - $index - 1);
+									if ($tmp == 'Checklist' || $tmp == 'Static' || 
+										$tmp == 'Run' || $tmp == 'Paths' || $tmp == 'Path'){
+											$tmp = '';
+									}
+									// handling 's' ending and 'ies' ending
+									if (substr($tmp, -3) == 'ies'){
+											$tmp = substr($tmp, 0, -3) . 'y';
+									}
+									if (substr($tmp, -1) == 's'){
+											$tmp = substr($tmp, 0, -1);
+									}
+
 									$tables_html .= '<tr><td><label>' . $out[$key][1] . '</label></td><td><input type="text"  value="' . $tmp . '"/>&nbsp;</td><td><input type="checkbox" ></td></tr>';
 								}
 							}
@@ -74,7 +96,7 @@
 			$sql = "SELECT botname FROM `mj_bots` WHERE id = $bid";
 			$botname = db_result(db_query($sql));
 
-			$targetPath .= '/' . $botname;
+			$targetPath .= '/' . str_replace('/', '', $botname);
 			if(!(file_exists($targetPath) && is_dir($targetPath))){
 				mkdir($targetPath);
 			}
@@ -87,7 +109,7 @@
 				$targetFile = rtrim($targetPath,'/') . '/' . $filename;
 				
 				// Validate the file type *.cs;*.regex;.sql;*.nlog;*.xml;*.bat;*.bat;
-				$fileTypes = array('cs','regex','sql','nlog','xml','bat','txt'); // File extensions
+				$fileTypes = array('cs','regex','sql','nlog','xml','bat','txt', 'config'); // File extensions
 				$fileParts = pathinfo($_FILES['Filedata']['name']);
 				
 				if (in_array(strtolower($fileParts['extension']), $fileTypes)) {

@@ -14,21 +14,22 @@
 		$date1 = '';
 		$date2 = '';
 
-		$employee = array('Yang Song'=>'Yang', 'Wei Yin' => 'Wei', 'Weilong Chen' => 'Weilong', 'Yilong Xie'=> 'Yilong');
+		$employee = array('Yang Song'=>'Yang', 'Wei Yin' => 'Wei', 
+			'Weilong Chen' => 'Weilong', 'Yilong Xie'=> 'Yilong', 'Chunrong Lei'=> 'Chunrong');
 
 	    $type = $_POST['type'];
 
 		if ($type == 1){
 			// weekly report 
 			$date1 = $_POST['fromdate'];
-		    $date2 = $_POST['todate'];
+	    $date2 = $_POST['todate'];
 
-		    if ((isset($date1) && !empty($date1) && strlen($date1) > 0)
+	    if ((isset($date1) && !empty($date1) && strlen($date1) > 0)
 				&& isset($date2) && !empty($date2) && strlen($date2) > 0){
 				module_load_include('inc', 'reports', 'inc/reports.generate');
 			    require_once 'files/Classes/PHPExcel.php';
-		        return  save_excel($date1, $date2);
-		    }
+		        return save_excel($date1, $date2);
+	    	}
 		}
 		else{
 			$new = $_POST['new'];	// if asks for new tasks
@@ -43,9 +44,9 @@
 
 			$output = '<b>Boryi - weekly report</b><br /><br />';
 			$output .= '<b>Boryi - a summary of today\'s work</b><br /><br />';
-	    	$output .= 'Daily repot of ' . $date . ':<br /><br />';
+	    	//$output .= 'Daily repot of ' . $date . ':<br /><br />';
 
-	    	$output .= 'Hi Ian and Jesse,<br/><br/>';
+	    	$output .= 'Hi Ian,<br/><br/>';
 	    	$output .= 'Here is a summary of today\'s work:<br/><br/>';
 
 			$result = db_query($sql); 

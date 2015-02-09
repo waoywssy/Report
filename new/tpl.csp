@@ -6,6 +6,7 @@
     <add key="BotName" value="$botname" />
     <add key="JobId" value="$jobid" />
     <add key="Sector" value="$sector" />
+    <add key="DBName" value="$database" />
     <add key="pType" value="SchemaExplorer.SqlSchemaProvider,SchemaExplorer.SqlSchemaProvider" />
   </variables>
   <propertySets>
@@ -31,25 +32,26 @@
       </property>
     </propertySet>
     $entity
-    <!--propertySet name="EntityBase" output="$(path)Entity\$(BotName)Entity.cs" template="EntityBase.cst">
-      <property name="Sector">$(Sector)</property>
-      <property name="BotName">$(BotName)</property>
-    </propertySet-->
-
-    <propertySet name="JobCentral" output="$(path)Database\DATA_JobCentral_$(BotName)_$(JobId).sql" template="JobCentral.cst">
+    <propertySet name="JobCentral" output="$(path)Database\DATA_JobCentral_$(BotName).sql" template="JobCentral.cst">
       <property name="Sector">$(Sector)</property>
       <property name="BotName">$(BotName)</property>
       <property name="JobId">$(JobId)</property>
       <property name="Regexes">$regex</property>
     </propertySet>
-    <!--propertySet name="StoredProcedure" output="$(path)Database\SP_$(Sector)_$(BotName).sql" template="StoredProcedure.cst">
+    <propertySet name="StoredProcedure" output="$(path)Database\SP_$(Sector)_$(BotName).sql" template="StoredProcedure.cst">
       <property name="SourceDatabase">
         <connectionString>$(Conn)</connectionString>
         <providerType>$(pType)</providerType>
       </property>
+      <property name="DBName">$(DBName)</property>
       <property name="Sector">$(Sector)</property>
       <property name="BotName">$(BotName)</property>
-    </propertySet-->
+    </propertySet>
+    <propertySet name="SPGrant" output="$(path)Database\SP_$(Sector)_$(BotName)_GRANT.sql" template="SPGrant.cst">
+      <property name="Sector">$(Sector)</property>
+      <property name="BotName">$(BotName)</property>
+      <property name="DBName">$(DBName)</property>
+    </propertySet>
     <propertySet name="master" output="$(path)Database\master.bat" template="master.cst">
       <property name="Sector">$(Sector)</property>
       <property name="BotName">$(BotName)</property>
@@ -68,10 +70,7 @@
       <property name="BotName">$(BotName)</property>
       <property name="Regexes">$regex</property>
     </propertySet>
-    <propertySet name="DBCreator" output="$(path)Database\DDL_Database_$(Sector).sql" template="DBCreator.cst">
-      <property name="Sector">$(Sector)</property>
-    </propertySet>
-        <propertySet name="DBSchema" output="$(path)Database\DDL_$(Sector)_$(BotName).sql" template="DBSchema.cst">
+    <propertySet name="DBSchema" output="$(path)Database\DDL_$(Sector)_$(BotName).sql" template="DBSchema.cst">
       <property name="Sector">$(Sector)</property>
     </propertySet>
   </propertySets>

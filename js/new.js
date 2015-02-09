@@ -121,7 +121,12 @@ $(function() {
 					data: 'data=' + params,
 					complete: function(data) {
 						if (data.responseText != ''){
-              alert(data.responseText);
+							if (data.responseText.indexOf(".zip") != -1){
+              	//alert(data.responseText);
+              	window.location = data.responseText;
+            	} else {
+            		alert("Failed to generate templates, please contact the manager!");
+            	}
             }
           }
 				});

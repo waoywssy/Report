@@ -21,7 +21,7 @@
 		$typesArray = array('Routine QA', 'Maintenance', 'Enhancement', 'Support', 'Development');
 		$type = $typesArray[$type];
 		
-		if ($comment>=0){
+		if (is_numeric($comment)){
 			$sql = "SELECT `cmt_comment` FROM `mj_comments` WHERE `cmt_id` = $comment";
 			//var_dump($sql);
 			$comment = db_result(db_query($sql));

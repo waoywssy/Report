@@ -56,7 +56,13 @@ function showTodayReports()
     $space = '</td><td>';
     $totaltime = 0;
     while ($data = db_fetch_object($records)) {
-        echo '<tr><td>' . substr($data->rpt_bts_id, 0, 3) . $space . $data->botname .$space . $data->issue . $space . '<img src="' . drupal_get_path('module', 'reports') . '/image/drop-' . ($data->delivery == 1 ? 'yes' : 'no') .'.gif" />';
+    	$bidstr = '';
+    	if ($data->rpt_bts_id > 9999){
+			$bidstr = substr($data->rpt_bts_id, 0, 3);
+    	} else {
+			$bidstr = substr($data->rpt_bts_id, 0, 4);
+    	}
+        echo '<tr><td>' . $bidstr . $space . $data->botname .$space . $data->issue . $space . '<img src="' . drupal_get_path('module', 'reports') . '/image/drop-' . ($data->delivery == 1 ? 'yes' : 'no') .'.gif" />';
         echo $space . $data->sector . $space . $data->type . $space . $data->time . $space . $data->employee. $space. $data->comment. $space;
         echo '<img class="close-img" alt="' . $data->rpt_id . '" src="' . drupal_get_path('module', 'reports') . '/image/close.gif" /></td></tr>';
         $totaltime += $data->time;
@@ -167,7 +173,7 @@ function scan_files($bid){
 	$keywords = $bdata->keywords;
 	$scan_path = array();
 
-	if ($version == 'R20')
+	if ($version == 'R20' || $version == 'R40')
 	{
 		$sql = "SELECT sps_path FROM mj_sectors_paths LEFT OUTER JOIN mj_bots ON bts_sct_id = sps_sct_id WHERE id = $bid";
 		$result = db_query($sql); 

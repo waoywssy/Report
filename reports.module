@@ -62,7 +62,7 @@ function reports_menu() {
         'page callback' => 'menufun_scan',
         'access callback' => 'report_user_access',
         'type' => MENU_CALLBACK,
-    );	
+    );
 	$items['path'] = array(
         'page callback' => 'menufun_path_js',
         'access callback' => 'report_user_access',
@@ -119,16 +119,8 @@ function menufun_load_sectors(){
 }
 
 function menufun_path_js(){
-	$sector_id = $_REQUEST['sid'];
-	$sql = "SELECT * FROM mj_sectors_paths WHERE sps_sct_id = $sector_id";
-	$data = db_query($sql);
-	$output = array();
-	while ($row = db_fetch_object($data)){
-		$val = $row->sps_path . ';';
-		//$val = str_replace("\\\\", "\\", $val);
-		$output[] = $val;
-	}
-	drupal_json($output);
+    module_load_include('inc', 'reports', 'inc/reports.jspath');
+    getpath();
 }
 
 function menufun_set_path(){

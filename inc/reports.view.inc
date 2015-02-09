@@ -16,6 +16,7 @@
 	drupal_add_js($bots_path . '/files/jqGrid/js/i18n/grid.locale-en.js');
 	drupal_add_js($bots_path . '/files/jqGrid/js/jquery.jqGrid.min.js');
 	drupal_add_js("var imgPath = '$bots_path/images/';", 'inline');
+	drupal_add_js($bots_path . '/js/botsid.js');
 	drupal_add_js($bots_path . '/js/grid-bots.js');
 	drupal_add_js($bots_path . '/js/jquery.contextmenu.js');
 	drupal_add_js($bots_path . '/js/jquery.uploadify.min.js');
@@ -135,21 +136,17 @@
 			else if ($row->priority == 5){
 				$priority = 'Least Important';
 			}
-			//"20:Daily;4:Weekly;8:Twice a Week;1:Monthly", 
+			//"20:Daily;4:Weekly;8:Twice a Week;1:Monthly;2:Twice a Month", 
 
-			$qaFreq = '';
-			if ($row->qaFreq == 1){
-				$qaFreq = 'Monthly';
-			}
-			else if ($row->qaFreq == 4){
-				$qaFreq = 'Weekly';
-			}			
-			else if ($row->qaFreq == 8){
-				$qaFreq = 'Twice a Week';
-			}			
-			else if ($row->qaFreq == 20){
-				$qaFreq = 'Daily';
-			}
+			$frequancy = array(
+				'1' => 'Monthly', 
+				'2' => 'Twice a Month', 
+				'4' => 'Weekly', 
+				'8' => 'Twice a Week', 
+				'20' => 'Daily', 
+				);
+
+			$qaFreq = $frequancy[$row->qaFreq];
 
 			$responce->rows[$i]['cell']=array(
 								$row->id,
@@ -167,7 +164,6 @@
 								);
 			$i++;
 			}
-			// var_dump($responce);
 		return json_encode($responce);
 	}
 ?>

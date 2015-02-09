@@ -9,7 +9,7 @@ function check_name(){
 }
 
 function check_version(version_value){
-	$("#sector").attr('disabled', version_value == 'R20' ? '' : 'disabled');
+	$("#sector").attr('disabled', (version_value == 'R20' || version_value == 'R40') ? '' : 'disabled');
 }
 function check_qa(checked){
 	$("#qaFreq").attr('disabled', checked == 1 ? '' : 'disabled');
@@ -23,6 +23,13 @@ var on_qa_change = function(e){
 function enable_confirm_button(){
 	$($('.ui-dialog-buttonset button').get(1)).attr('disabled', false).removeClass("ui-state-disabled");
 	$('#confirm_msg').remove();
+}
+function check_input(id, ext){
+	$('#' + id).bind('click', function(){
+	$('#files li').filter(function () {
+			return $(this).text().substr(-3,3).toLowerCase()==ext; })
+		.find('input').attr('checked', this.checked ? 'checked' : '');
+	});
 }
 
 function scan(id, data){
@@ -52,6 +59,9 @@ function scan(id, data){
 	}
 	tmp += '</ul>';
 	tmp += '<span class="checkall"><input type="checkbox" id="checkall" ' + (allchecked ? 'checked="checked"':'') + '>All</span>';
+	tmp += '&nbsp;<span><input type="checkbox" id="checkregex">Regex</span>';
+	tmp += '&nbsp;<span><input type="checkbox" id="checkcs">c#</span>';
+	tmp += '&nbsp;<span><input type="checkbox" id="checksql">SQL</span>';
 	if (ignored_found){
 		tmp += '<span><input type="checkbox" id="showignored">Show Hidden</span>';
 	}
@@ -73,6 +83,10 @@ function scan(id, data){
 			$('#files input').attr('checked', this.checked ? 'checked' : '');
 			enable_confirm_button();
 		});
+
+	check_input('checkregex', 'ex;');
+	check_input('checkcs', 'cs;');
+	check_input('checksql', 'ql;');
 		
 	$('#files input').bind('click', function(){
 		if (this.checked) {
@@ -118,7 +132,7 @@ jQuery().ready(function(){
 		'swf'      		: 'uploadify.swf',
 		'uploader' 		: 'uploadify',
 		'fileSizeLimit'	: '1MB',
-		'fileTypeExts'  : '*.cs;*.regex;*.sql;*.nlog;*.xml;*.bat;*.txt;',
+		'fileTypeExts'  : '*.cs;*.regex;*.sql;*.nlog;*.xml;*.bat;*.txt;*.config;',
 		'successTimeout': '10',
 		'removeTimeout': '2',
 		onUploadError : function(file, errorCode, errorMsg){
@@ -140,11 +154,11 @@ jQuery().ready(function(){
 				{name:'botname', index:'botname', width:45, editable: true, editrules:{required:true, custom:true, custom_func:check_name,}, searchoptions:{sopt:['cn'], searchOnEnter:true}}, 
 			{name:'filename', index:'filename', width:45, editable: true, editrules:{required:true, custom:true, custom_func:check_name,} /*searchoptions:{sopt:['cn'], searchOnEnter:true}*/}, 
 				{name:'sector', index:'sector', width:40, editable: true,edittype:"select",
-						editoptions: { value: "1:E\u2013Commerce;2:Retail \u2013 Softline ;3:Retail \u2013 Hardline ;4:Medical Devices;5:Telecommunications;6:Lodging;7:Auto Retail;8:Video Games;9:Real Estate;10:Store Locators;11:AirLines;12:R&D;13:Homebuilders;14:Mobile Phone;15:FExchange;16:Consumer Technology;20:Restaurant;19:KeywordSearches;22:Cable And Satellite;23:Christies"/*21:SocialNetworking;*/ },
+						editoptions: { value: "1:E\u2013Commerce;2:Retail \u2013 Softline ;3:Retail \u2013 Hardline ;4:Medical Devices;5:Telecommunications;6:Lodging;7:Auto Retail;8:Video Games;9:Real Estate;10:Store Locators;11:AirLines;12:R&D;13:Homebuilders;14:Mobile Phone;15:FExchange;16:Consumer Technology;20:Restaurant;19:KeywordSearches;22:Cable And Satellite;23:Christies;24:Grocers;25:Retail"/*21:SocialNetworking;*/ },
 						search:true, searchoptions:{sopt:['cn'], searchOnEnter:true}},
 				{name:'qaAtBoryi', index:'qaAtBoryi', width:20, editable: true, edittype:"checkbox",editoptions: { value: "1:0", },search:false, defval:"1",}, 
 				{name:'qaFreq', index:'qaFreq', width:30, editable: true, edittype:"select",
-						editoptions: { value: "20:Daily;4:Weekly;8:Twice a Week;1:Monthly", 
+						editoptions: { value: "20:Daily;4:Weekly;8:Twice a Week;1:Monthly;2:Twice a Month", 
 										/*dataEvents: [{ type: 'change', fn: on_version_change },
 													 { type: 'select', fn: on_version_change },	]*/
 													 },
@@ -156,7 +170,7 @@ jQuery().ready(function(){
 				{name:'jobid', index:'jobid', width:30, editable: true, editrules:{/*required:true,*/}, searchoptions:{sopt:['cn'], searchOnEnter:true} },
 				{name:'keywords', index:'keywords', width:40, editable: true, editrules:{required:true,}, search:false, },
 				{name:'version', index:'version', width:30, editable: true, edittype:"select",
-						editoptions: { value: "R20:R20;R16:R16;R14:R14;Ruby:Ruby", 
+						editoptions: { value: "R20:R20;R16:R16;R40:R40;R14:R14;Ruby:Ruby", 
 										dataEvents: [{ type: 'change', fn: on_version_change },
 													 { type: 'select', fn: on_version_change },	]},
 						search:false, 
@@ -367,4 +381,18 @@ jQuery().ready(function(){
 			}
 		)
 	});
+
+	var b;
+	var t = $('<table>').css('text-align', 'left');
+	t.append('<tr><th colspan="2">共' + ontime_bots.length + '个Bot</th><tr>');
+	t.append('<tr><th>OnTime BotId</th><th>OnTime Bot Name</th><tr>');
+	for (var i = ontime_bots.length - 1; i >= 0; i--) {
+		b = ontime_bots[i];
+		t.append(
+			$('<tr>')
+				.append($('<td>').append(b.id))
+				.append($('<td>').append(b.value))
+			);
+	};
+	$('#footer').append(t);
 })

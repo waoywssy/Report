@@ -8,7 +8,7 @@ Description: Create a class of entity which has properties from a database table
 <%@ Property Name="Sector" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The sector of the bot." %>
 <%@ Property Name="BotName" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The name of the bot." %>
 <%@ Property Name="EntityName" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The name of the entity." %>
-<%@ Property Name="NeedCollection" Type="System.Boolean" Default="True" Optional="True" Category="EntityParams" Description="Need collection class or not." %>
+<%@ Property Name="NeedCollection" Type="System.Boolean" Default="False" Optional="False" Category="EntityParams" Description="Need collection class or not." %>
 
 <%@ Map Name="CSharpAlias" Src="System-CSharpAlias" Description="System to C# Type Map" %>
 <%@ Assembly Name="SchemaExplorer" %>
@@ -21,13 +21,14 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 using System.Data.SqlTypes;
+using Majestic.Util;
 
 namespace Majestic.Entity.<%= Sector %>.<%= BotName %>
 {
     /// <remarks>
     /// Data entity for <%= EntityName %>
     /// </remarks>
-    public class <%= EntityName %> : <%= BotName %>Entity
+    public class <%= EntityName %>
     {
         #region Field 
        
@@ -35,15 +36,18 @@ namespace Majestic.Entity.<%= Sector %>.<%= BotName %>
         if (column.Name.ToLower()!="rundate" &&
             column.Name.ToLower()!="firstfound" &&
             column.Name.ToLower()!="lastfound" &&
+            column.Name.ToLower()!="firstseendate" &&
+            column.Name.ToLower()!="lastseendate" &&
             column.Name.ToLower()!="runid" &&
             column.Name.ToLower()!="firstrunid" &&
             column.Name.ToLower()!="lastrunid" &&
-            column.Name.ToLower()!="id" &&
             column.Name.ToLower()!="insertiondate")
         {
         %>
         private Sql<%= CSharpAlias[column.SystemType.Name] %> <%= StringUtil.ToCamelCase(column.Name) %>;
     <% }} %>
+        private SqlDateTime runDate;
+        private SqlInt64 runId;
         
         #endregion Field 
         
@@ -54,10 +58,11 @@ namespace Majestic.Entity.<%= Sector %>.<%= BotName %>
         if (column.Name.ToLower()!="rundate" &&
             column.Name.ToLower()!="firstfound" &&
             column.Name.ToLower()!="lastfound" &&
+            column.Name.ToLower()!="firstseendate" &&
+            column.Name.ToLower()!="lastseendate" &&
             column.Name.ToLower()!="runid" &&
             column.Name.ToLower()!="firstrunid" &&
             column.Name.ToLower()!="lastrunid" &&
-            column.Name.ToLower()!="id" &&
             column.Name.ToLower()!="insertiondate")
         {
         %>
@@ -70,6 +75,24 @@ namespace Majestic.Entity.<%= Sector %>.<%= BotName %>
             set { <%= StringUtil.ToCamelCase(column.Name) %> = value; }
         }
     <% }} %>
+    
+        /// <remarks>
+        /// Property for runDate
+        /// </remarks>
+        public SqlDateTime RunDate
+        {
+            get { return runDate; }
+            set { runDate = value; }
+        }
+
+        /// <remarks>
+        /// Property for runId
+        /// </remarks>
+        public SqlInt64 RunId
+        {
+            get { return runId; }
+            set { runId = value; }
+        }
     
         #endregion Properties 
         
@@ -90,10 +113,11 @@ namespace Majestic.Entity.<%= Sector %>.<%= BotName %>
                 if (column.Name.ToLower()!="rundate" &&
                     column.Name.ToLower()!="firstfound" &&
                     column.Name.ToLower()!="lastfound" &&
+                    column.Name.ToLower()!="firstseendate" &&
+                    column.Name.ToLower()!="lastseendate" &&
                     column.Name.ToLower()!="runid" &&
                     column.Name.ToLower()!="firstrunid" &&
                     column.Name.ToLower()!="lastrunid" &&
-                    column.Name.ToLower()!="id" &&
                     column.Name.ToLower()!="insertiondate")
                 {%><% if(paramCounter > 0){%>, <%}%>string <%= StringUtil.ToCamelCase(column.Name) %><% paramCounter++;%><% }} %>)
         {
@@ -101,10 +125,11 @@ namespace Majestic.Entity.<%= Sector %>.<%= BotName %>
                 if (column.Name.ToLower()!="rundate" &&
                     column.Name.ToLower()!="firstfound" &&
                     column.Name.ToLower()!="lastfound" &&
+                    column.Name.ToLower()!="firstseendate" &&
+                    column.Name.ToLower()!="lastseendate" &&
                     column.Name.ToLower()!="runid" &&
                     column.Name.ToLower()!="firstrunid" &&
                     column.Name.ToLower()!="lastrunid" &&
-                    column.Name.ToLower()!="id" &&
                     column.Name.ToLower()!="insertiondate")
                 {
                 %>
@@ -112,22 +137,22 @@ namespace Majestic.Entity.<%= Sector %>.<%= BotName %>
             this.<%= StringUtil.ToCamelCase(column.Name) %> = <%= StringUtil.ToCamelCase(column.Name) %>;
             <%}
             else if (CSharpAlias[column.SystemType.Name].Equals("Int32")){%>
-            this.<%= StringUtil.ToCamelCase(column.Name) %> = ReadInt(<%= StringUtil.ToCamelCase(column.Name) %>, SqlInt32.Null);
+            this.<%= StringUtil.ToCamelCase(column.Name) %> = SqlTypeConverter.ReadInt(<%= StringUtil.ToCamelCase(column.Name) %>, SqlInt32.Null);
             <%}
             else if (CSharpAlias[column.SystemType.Name].Equals("Int64")){%>
-            this.<%= StringUtil.ToCamelCase(column.Name) %> = ReadBigInt(<%= StringUtil.ToCamelCase(column.Name) %>, SqlInt64.Null);
+            this.<%= StringUtil.ToCamelCase(column.Name) %> = SqlTypeConverter.ReadBigInt(<%= StringUtil.ToCamelCase(column.Name) %>, SqlInt64.Null);
             <%}
             else if (CSharpAlias[column.SystemType.Name].Equals("Decimal")){%>
-            this.<%= StringUtil.ToCamelCase(column.Name) %> = ReadDecimal(<%= StringUtil.ToCamelCase(column.Name) %>, SqlDecimal.Null);
+            this.<%= StringUtil.ToCamelCase(column.Name) %> = SqlTypeConverter.ReadDecimal(<%= StringUtil.ToCamelCase(column.Name) %>, SqlDecimal.Null);
             <%}
             else if (CSharpAlias[column.SystemType.Name].Equals("Money")){%>
-            this.<%= StringUtil.ToCamelCase(column.Name) %> = ReadMoney(<%= StringUtil.ToCamelCase(column.Name) %>, SqlMoney.Null);
+            this.<%= StringUtil.ToCamelCase(column.Name) %> = SqlTypeConverter.ReadMoney(<%= StringUtil.ToCamelCase(column.Name) %>, SqlMoney.Null);
             <%}
             else if (CSharpAlias[column.SystemType.Name].Equals("Boolean")){%>
-            this.<%= StringUtil.ToCamelCase(column.Name) %> = ReadBoolean(<%= StringUtil.ToCamelCase(column.Name) %>, SqlBoolean.Null);
+            this.<%= StringUtil.ToCamelCase(column.Name) %> = SqlTypeConverter.ReadBoolean(<%= StringUtil.ToCamelCase(column.Name) %>, SqlBoolean.Null);
             <%}
             else if (CSharpAlias[column.SystemType.Name].Equals("DateTime")){%>
-            this.<%= StringUtil.ToCamelCase(column.Name) %> = ReadDateTime(<%= StringUtil.ToCamelCase(column.Name) %>, SqlDateTime.Null);
+            this.<%= StringUtil.ToCamelCase(column.Name) %> = SqlTypeConverter.ReadDateTime(<%= StringUtil.ToCamelCase(column.Name) %>, SqlDateTime.Null);
             <%}
             
             }} %>
@@ -180,10 +205,11 @@ namespace Majestic.Entity.<%= Sector %>.<%= BotName %>
                 if (column.Name.ToLower()!="rundate" &&
                     column.Name.ToLower()!="firstfound" &&
                     column.Name.ToLower()!="lastfound" &&
+                    column.Name.ToLower()!="firstseendate" &&
+                    column.Name.ToLower()!="lastseendate" &&
                     column.Name.ToLower()!="runid" &&
                     column.Name.ToLower()!="firstrunid" &&
                     column.Name.ToLower()!="lastrunid" &&
-                    column.Name.ToLower()!="id" &&
                     column.Name.ToLower()!="insertiondate")
                 {
                 %><% if(paramCounter++ > 0){%>, <%}%>string <%= StringUtil.ToCamelCase(column.Name) %><% }} %>)
@@ -194,10 +220,11 @@ namespace Majestic.Entity.<%= Sector %>.<%= BotName %>
                 if (column.Name.ToLower()!="rundate" &&
                     column.Name.ToLower()!="firstfound" &&
                     column.Name.ToLower()!="lastfound" &&
+                    column.Name.ToLower()!="firstseendate" &&
+                    column.Name.ToLower()!="lastseendate" &&
                     column.Name.ToLower()!="runid" &&
                     column.Name.ToLower()!="firstrunid" &&
                     column.Name.ToLower()!="lastrunid" &&
-                    column.Name.ToLower()!="id" &&
                     column.Name.ToLower()!="insertiondate")
                 {
                 %><% if(paramCounter++ > 0){%>, <%}%><%= StringUtil.ToCamelCase(column.Name) %><% }} %>));

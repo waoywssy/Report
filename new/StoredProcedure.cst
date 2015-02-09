@@ -5,9 +5,10 @@ Description: Create a template to generate database stored procedures
 --%>
 <%@ CodeTemplate Language="C#" TargetLanguage="Text" Src="" Inherits="" Debug="False" CompilerVersion="v3.5" Description="Template description here." %>
 <%@ Property Category="Database" Name="SourceDatabase" Type="SchemaExplorer.DatabaseSchema" Optional="False" Description="Database the tables will come from." %>
+<%@ Property Name="DBName" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The name of database." %>
 <%@ Property Name="Sector" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The sector of the bot." %>
 <%@ Property Name="BotName" Type="System.String" Default="" Optional="False" Category="EntityParams" Description="The name of the bot." %>
-<%@ Property Name="tableEntry" Type="NameValueCollection" Optional="False" %>
+<%--@ Property Name="tableEntry" Type="NameValueCollection" Optional="False" --%>
 
 <%@ Map Name="CSharpAlias" Src="System-CSharpAlias" Description="System to C# Type Map" %>
 <%@ Assembly Name="SchemaExplorer" %>
@@ -15,9 +16,9 @@ Description: Create a template to generate database stored procedures
 <%@ Import Namespace="SchemaExplorer" %>
 <%@ Import Namespace="System.Collections" %>
 <%@ Import Namespace="CodeSmith.CustomProperties" %>
-USE <%= Sector %>
+USE <%= DBName %>
 GO
-
+<%-- 
 <%
     foreach(TableSchema table in SourceDatabase.Tables)
     {
@@ -80,9 +81,8 @@ BEGIN
         %><%}
     } %>)
 END
-
 GO
-
 <%      }
     }
 %>
+--%>
