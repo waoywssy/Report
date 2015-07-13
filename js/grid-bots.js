@@ -154,7 +154,7 @@ jQuery().ready(function(){
 				{name:'botname', index:'botname', width:45, editable: true, editrules:{required:true, custom:true, custom_func:check_name,}, searchoptions:{sopt:['cn'], searchOnEnter:true}}, 
 			{name:'filename', index:'filename', width:45, editable: true, editrules:{required:true, custom:true, custom_func:check_name,} /*searchoptions:{sopt:['cn'], searchOnEnter:true}*/}, 
 				{name:'sector', index:'sector', width:40, editable: true,edittype:"select",
-						editoptions: { value: "1:E\u2013Commerce;2:Retail \u2013 Softline ;3:Retail \u2013 Hardline ;4:Medical Devices;5:Telecommunications;6:Lodging;7:Auto Retail;8:Video Games;9:Real Estate;10:Store Locators;11:AirLines;12:R&D;13:Homebuilders;14:Mobile Phone;15:FExchange;16:Consumer Technology;20:Restaurant;19:KeywordSearches;22:Cable And Satellite;23:Christies;24:Grocers;25:Retail"/*21:SocialNetworking;*/ },
+						editoptions: { value: "1:E\u2013Commerce;2:Retail \u2013 Softline ;3:Retail \u2013 Hardline ;4:Medical Devices;5:Telecommunications;6:Lodging;7:Auto Retail;8:Video Games;9:Real Estate;10:Store Locators;11:AirLines;12:R&D;13:Homebuilders;14:Mobile Phone;15:FExchange;16:Consumer Technology;20:Restaurant;19:KeywordSearches;22:Cable And Satellite;23:Christies;24:Grocers;25:Retail;26:Energy"/*21:SocialNetworking;*/ },
 						search:true, searchoptions:{sopt:['cn'], searchOnEnter:true}},
 				{name:'qaAtBoryi', index:'qaAtBoryi', width:20, editable: true, edittype:"checkbox",editoptions: { value: "1:0", },search:false, defval:"1",}, 
 				{name:'qaFreq', index:'qaFreq', width:30, editable: true, edittype:"select",

@@ -62,13 +62,13 @@ namespace Majestic.Bot.Job.<%= Sector %>
         if (Sector.Equals("RetailListing")) 
         {
     %>
-    class <%= BotName %> : RetailBase
+    public sealed class <%= BotName %> : RetailBase
     <%
         }
         else
         {
     %>
-    class <%= BotName %> : <%= Sector %>Base
+    public sealed class <%= BotName %> : <%= Sector %>Base
     <%
         }
     %>
@@ -109,7 +109,7 @@ namespace Majestic.Bot.Job.<%= Sector %>
         private int sleepTime; // in seconds
         private int maxHourlyPageView; // for proxy bandwidth
         private int regexTimeout;
-        private WebManager webManager = null;
+        private HttpManager httpManager = null;
 
         private long runId;
         private DateTime runDate;
@@ -177,7 +177,7 @@ namespace Majestic.Bot.Job.<%= Sector %>
                 userAgent = XmlConfigReader.GetString(executionProperties, "userAgent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)");
                 regexTimeout = XmlConfigReader.GetInt(executionProperties, "regexTimeout", 30);
                 
-                InitWebManager();
+                InithttpManager();
                 InitRegex();
 <%
     foreach(TableSchema table in SourceDatabase.Tables)
@@ -205,19 +205,19 @@ namespace Majestic.Bot.Job.<%= Sector %>
             }
         }
         
-        private void InitWebManager()
+        private void InithttpManager()
         {
-            webManager = new WebManager();
+            httpManager = new httpManager();
 
             if (String.IsNullOrEmpty(proxy) || proxy.Equals("none"))
             {
                 throw new Exception("proxy was not set! job ended!");
             }
-            webManager.Proxy = new WebProxy(proxy);
+            httpManager.Proxy = new WebProxy(proxy);
 
             if (!string.IsNullOrEmpty(userAgent))
             {
-                webManager.UserAgent = userAgent;
+                httpManager.UserAgent = userAgent;
             }
 
         }
@@ -330,7 +330,7 @@ namespace Majestic.Bot.Job.<%= Sector %>
 
             requestStartTime = DateTime.Now;
 
-            result = webManager.HttpGetWithManualCookieHandling(url, domain, true);
+            result = httpManager.HttpGetWithManualCookieHandling(url, domain, true);
 
             pageCrawled++;
 
@@ -358,7 +358,7 @@ namespace Majestic.Bot.Job.<%= Sector %>
 
             requestStartTime = DateTime.Now;
 
-            result = webManager.HttpPostWithManualCookieHandling(url, postData, domain, true);
+            result = httpManager.HttpPostWithManualCookieHandling(url, postData, domain, true);
 
             pageCrawled++;
 
@@ -384,7 +384,7 @@ namespace Majestic.Bot.Job.<%= Sector %>
             Thread.Sleep(Math.Max(randomSleepMilSeconds, bandwidthSleepMilSeconds));
 
             requestStartTime = DateTime.Now;
-            result = webManager.HttpGet(url);
+            result = httpManager.HttpGet(url);
             pageCrawled++;
 
             return result;
@@ -412,8 +412,8 @@ namespace Majestic.Bot.Job.<%= Sector %>
 
             requestStartTime = DateTime.Now;
 
-            webManager.AutoRedirect = true;
-            result = webManager.HttpPost(url, postData);
+            httpManager.AutoRedirect = true;
+            result = httpManager.HttpPost(url, postData);
 
             pageCrawled++;
             return result;

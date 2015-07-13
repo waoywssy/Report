@@ -15,7 +15,7 @@
 		$date2 = '';
 
 		$employee = array('Yang Song'=>'Yang', 'Wei Yin' => 'Wei', 
-			'Weilong Chen' => 'Weilong', 'Yilong Xie'=> 'Yilong', 'Chunrong Lei'=> 'Chunrong');
+			'Weilong Chen' => 'Weilong', 'Jian Zhou'=> 'JianZhou');
 
 	    $type = $_POST['type'];
 
@@ -42,11 +42,11 @@
 	    	$sql = "SELECT issue, delivery, type, employee, comment, botname, others FROM `mj_reports` left outer join `mj_bots` on bts_id = rpt_bts_id WHERE `rdate` = '$date' and type<> 'Routine QA'
 				order by employee, delivery desc";
 
-			$output = '<b>Boryi - weekly report</b><br /><br />';
+			$output = '<hr />';
 			$output .= '<b>Boryi - a summary of today\'s work</b><br /><br />';
 	    	//$output .= 'Daily repot of ' . $date . ':<br /><br />';
 
-	    	$output .= 'Hi Ian,<br/><br/>';
+	    	$output .= 'Hi Henry,<br/><br/>';
 	    	$output .= 'Here is a summary of today\'s work:<br/><br/>';
 
 			$result = db_query($sql); 
@@ -91,12 +91,17 @@
 					$output .= '(issue ' . $data->issue . ')';
 				}
 				$output .= '.';
-				if (!empty($data->comment)){
+
+				if (!empty($data->comment) && $data->type != 'QA Auto Script'){
 					$output .= ' ' . $data->comment . '.';
 				}
 				$output .= $data->delivery == 1 ? ' Please deploy.':'';
 				$output .= '<br />';
 			}
+
+			$output .= '<br/>Please deploy: <br/>';
+			$output .= '<b>QA SCRIPTS HERE!</b><br/><br/>';
+
 			if (isset($svn)){
 				$output .= '<br/>The SVN server just runs out of disk space again and we failed to commit todays scripts. Please check.<br/>';
 			}
@@ -104,9 +109,15 @@
 				$output .= '<br/>We have finished most of the development/maintenance. Please assign new tasks to us. Thanks. <br/>';
 			}
 
-			$output .= '<br/>best wishes,<br/>';
-			$output .= '<br/>Yang';
+			$output .= '<br/>Best Regards,';
+			$output .= '<br/>Yang<br /><br />';
 		}
+		$output .= '<hr />';
+		$output .= '<b>Boryi - weekly report</b><br /><br />';
+		$output .= 'Hi Henry, <br /><br />';
+		$output .= 'This is a weekly report of last week. Please check the attachment. <br /><br />';
+		$output .= 'Best Regards,<br />';
+		$output .= 'Yang<br />';
 
 		$output = str_replace('..', '.', $output);
 	    

@@ -42,6 +42,7 @@ DELETE FROM JobCentral.dbo.Job_Regex WHERE Job_Id = @JobId<%= i.ToString()%>;
     foreach (string jobId in jobIds){ 
 %>
 DELETE Maj_Jobs WHERE JobId = @JobId<%= i.ToString()%>;
+DELETE Maj_BotJobs WHERE JobId = @JobId<%= i.ToString()%>;
 <%
     i++;
     }
@@ -56,6 +57,12 @@ DELETE Maj_Jobs WHERE JobId = @JobId<%= i.ToString()%>;
 %>
 INSERT INTO Maj_Jobs(JobID, JobName, Disabled, Class, Config, Url, GoMinute, GoHour, GoDayOfWeek, SavePages, ServerName)
 VALUES(@JobId<%= i.ToString()%>, '<%= Sector %>', 1, 'Majestic.Bot.Job.<%= Sector %>.<%= BotName %>', '<%= Sector %>', NULL, NULL, NULL, NULL, 0, 'BORYI');
+GO
+INSERT INTO JobCentral.dbo.Maj_BotJobs
+(JobID,BotID,BotName,Sector,BotDescription,Disabled,RunFrequency,BotVersion,DataServer,DBName,Outsourcer,QAScript,BotServer,LastRunDate,QASchedule)
+VALUES
+(@JobId,botid,'<%= BotName %>','<%= Sector %>','',1,'','R20','IRBOTSQL01\SQL01','<%= Sector %>','Boryi','QA1@JobId-<%= BotName %>.sql','',null,null);
+
 <%
     i++;
     }

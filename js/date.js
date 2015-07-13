@@ -11,8 +11,8 @@ $(function() {
 
 	$("#type").change(
 		function(){
-			// No comments for 'development' and 'routineQA'
-			if($(this).val() == 0 || $(this).val() == 4){
+			// No comments for 'development', 'AutoQA delivered' and 'routineQA'
+			if($(this).val() == 0 || $(this).val() == 4  || $(this).val() == 5){
 				$('#sp_comment').hide();
 			}
 			else{

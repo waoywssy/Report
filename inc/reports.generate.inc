@@ -18,8 +18,13 @@ define('COLOR_DEVELOPMENT_ODD', '00D99795');
 
 define('QA_TYPE_DEVELOPMENT', 'Development');
 define('QA_TYPE_MAINTENANCE', 'Maintenance');
+define('QA_TYPE_QASCRIPT', 'QA Auto Script');
 define('QA_TYPE_ENHANCEMENT', 'Enhancement');
 define('QA_TYPE_ROUTINEQA', 'Routine QA');
+
+define('QAER_JIAN_ZHOU', 'Jian Zhou');
+define('QAER_YANG_SONG', 'Yang Song');
+
 
 
 function save_excel($date1, $date2){
@@ -48,10 +53,11 @@ function save_excel($date1, $date2){
 		$sql ="SELECT DISTINCT bts_id, botname, qaTime, sector, issue, date_format(rdate,\"%c/%e/%Y\") as date, delivery, type, time, employee, qatimes
 		FROM 
 		(
-			SELECT bts_id, botname, bts_sct_id, qaTime, NULL as issue, '$_today' as rdate, 0 as delivery, 'Routine QA' as type, IFNULL(time, qaTime) as time, IFNULL(employee, 'Chunrong Lei') as employee , qatimes
-			FROM (SELECT * FROM mj_bots WHERE (qaAtBoryi = 1 and qatimes >= %d) OR bts_id in (SELECT rpt_bts_id FROM mj_reports WHERE rdate = '$_today' AND TYPE = 'Routine QA')) AS M
+			SELECT bts_id, botname, bts_sct_id, qaTime, NULL as issue, '$_today' as rdate, 0 as delivery, 'Routine QA' as type, IFNULL(time, qaTime) as time, IFNULL(employee, 'Jian Zhou') as employee , qatimes
+			FROM (SELECT * FROM mj_bots WHERE (qaAtBoryi = 1 and qatimes >= %d) OR bts_id in (SELECT rpt_bts_id FROM mj_reports WHERE rdate = '$_today' AND TYPE = 'Routine QA')) AS M 
 			LEFT OUTER JOIN (SELECT * FROM mj_reports WHERE rdate = '$_today' AND TYPE = 'Routine QA') as T
-			ON rpt_bts_id = bts_id
+			ON rpt_bts_id = bts_id 
+			LIMIT 0, 1
 		UNION
 			SELECT bts_id, botname, bts_sct_id, qaTime, issue, rdate, delivery, type, time, employee, qatimes
 			FROM (SELECT * FROM mj_reports WHERE rdate = '$_today' AND TYPE <> 'Routine QA') AS b 
@@ -98,7 +104,7 @@ function save_excel($date1, $date2){
 			
 			if ($data->type== QA_TYPE_DEVELOPMENT) {
 				$development = $data->time;
-			} else if ($data->type== QA_TYPE_MAINTENANCE) {
+			} else if ($data->type == QA_TYPE_MAINTENANCE || $data->type == QA_TYPE_QASCRIPT) {
 				$defect = $data->time;
 			} else if ($data->type== QA_TYPE_ENHANCEMENT) {
 				$enhancement = $data->time;
@@ -118,8 +124,8 @@ function save_excel($date1, $date2){
 			$QAer = $data->employee;
 
 			// roughly estimate the QA time for each QAer
-			if ($today_qa_time > 8.10 && $QAer == 'Chunrong Lei') {
-				$QAer = 'Yang Song';
+			if ($today_qa_time > 8.10 && $QAer == QAER_JIAN_ZHOU) {
+				$QAer = QAER_YANG_SONG;
 			}
 
 			if($data->qatimes >= CHECKED_DAILY || $data->type != QA_TYPE_ROUTINEQA){
@@ -161,7 +167,7 @@ function save_excel($date1, $date2){
 			for ($qa_row = $first_qa_row; $qa_row < $last_qa_row; $qa_row++) {
 				$temp = $objPHPExcel->setActiveSheetIndex(0)->getCellByColumnAndRow(13, $qa_row)->getValue();
 				$temp += $today_qa_time;
-				$objPHPExcel->setActiveSheetIndex(0)->setCellValue('N' . ($qa_row) , $temp);
+				// $objPHPExcel->setActiveSheetIndex(0)->setCellValue('N' . ($qa_row) , $temp);
 			}
 		}
 
@@ -185,6 +191,17 @@ function save_excel($date1, $date2){
     $objWriter->save('php://output');
     exit;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 function set_fonts(&$objPHPExcel){
